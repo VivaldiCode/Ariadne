@@ -1,0 +1,20 @@
+# Contexto = raiz do repositório (ver server/Dockerfile)
+.git
+.env
+data/
+bench/
+docs/
+deploy/*
+!deploy/gpu
+!deploy/wikijs-theme
+deploy/wikijs-theme/capturas
+!deploy/postgres
+**/.venv
+**/__pycache__
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+**/node_modules
+server/tests
+server/.cache
+web/dist

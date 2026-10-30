@@ -1,0 +1,25 @@
+[project]
+name = "ariadne-bench-embeddings"
+version = "0.1.0"
+description = "Benchmark de embeddings em CPU sem AVX (Fase 0 do Ariadne)"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "libzim>=3.6",
+    "numpy>=2.0",
+    "onnxruntime>=1.20",
+    "tokenizers>=0.21",
+]
+
+[dependency-groups]
+dev = ["ruff>=0.9"]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF"]
+ignore = ["RUF001", "RUF002", "RUF003"]

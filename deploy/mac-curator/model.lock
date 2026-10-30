@@ -1,0 +1,10 @@
+# O modelo do curador, fixado: ficheiro, revisão, tamanho e sha256. O install.sh/update.sh só aceitam
+# um ficheiro que bata certo com isto. Para trocar de modelo muda-se este ficheiro (num commit) e
+# corre-se update.sh. Formato: shell (source).
+MODEL_REPO="ggml-org/gemma-3-12b-it-GGUF"
+MODEL_REVISION="ec0cbabd8dbff316f659876a50202295c3c4a314"
+MODEL_FILE="gemma-3-12b-it-Q4_K_M.gguf"
+MODEL_BYTES=7300574976
+MODEL_SHA256="7bb69bff3f48a7b642355d64a90e481182a7794707b3133890646b1efa778ff5"
+# O nome que o servidor anuncia em /v1/models: é o valor de CURATOR_MODEL no cofre do Ariadne.
+MODEL_ALIAS="gemma-3-12b-it"

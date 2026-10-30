@@ -1,0 +1,29 @@
+/* Resultados de pesquisa: mesma tipografia e cores do resto (também é usado pelo template search_result.html). */
+@import url("../skin/ariadne/ariadne.css?KIWIXCACHEID");
+* { box-sizing: border-box; }
+html { background: var(--ink); color-scheme: dark; }
+body { margin: 0; padding: var(--space-l) var(--gutter) var(--space-section-mobile); background: var(--ink); color: var(--body); font-family: var(--font-text); font-size: var(--fs-small); line-height: var(--lh-small); }
+a { color: var(--thread-text); text-decoration: none; }
+a:visited { color: var(--thread-text); }
+a:hover { color: var(--bone); text-decoration: underline; }
+:focus-visible { outline: var(--focus); outline-offset: var(--focus-offset); }
+::selection { background: var(--thread); color: var(--ink); }
+h1, .header { margin: 0 0 var(--space-m); font-family: var(--font-mono); font-weight: 500; font-size: var(--fs-label); line-height: var(--lh-label); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--stone); }
+.header b, .header strong { color: var(--bone); font-weight: 500; }
+ul { margin: 0; padding: 0; }
+.results { max-width: 70ch; }
+.results li { list-style: none; margin: 0 0 var(--space-m); padding: var(--space-m); background: var(--ink-2); border: var(--border); }
+.results li:hover { border-color: var(--wall); }
+.results a { font-weight: 600; font-size: var(--fs-heading-3); line-height: var(--lh-heading-3); text-decoration: none; }
+.results a:hover { text-decoration: underline; }
+cite { display: block; margin-top: var(--space-xs); font-style: normal; word-wrap: break-word; color: var(--body); font-size: var(--fs-small); line-height: var(--lh-small); }
+.book-title, .informations { display: inline-block; margin: var(--space-s) var(--space-m) 0 0; font-family: var(--font-mono); font-weight: 500; font-size: var(--fs-tag); letter-spacing: var(--ls-tag); text-transform: uppercase; color: var(--stone); }
+.footer { padding: 0; margin-top: var(--space-l); width: 100%; float: none; }
+.footer ul, .footer li { list-style: none; margin: 0; padding: 0; }
+.footer ul { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+.footer li { float: none; }
+.footer a, .footer span { display: flex; align-items: center; justify-content: center; min-width: var(--target-min); min-height: var(--target-min); padding: 0 var(--space-12); margin: 0; border: var(--border); color: var(--body); text-decoration: none; font-family: var(--font-mono); font-size: var(--fs-label); }
+.footer a:hover { background: var(--ink-2); color: var(--bone); border-color: var(--wall); }
+.selected, .footer a.selected { background: var(--ink-2); color: var(--bone); border-color: var(--thread); }
+@media (min-width: 640px) { :root { --gutter: 24px; } }
+@media (min-width: 1000px) { :root { --gutter: 40px; } }

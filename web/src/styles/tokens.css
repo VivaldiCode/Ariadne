@@ -1,0 +1,103 @@
+/* Tokens do design system do Ariadne (Penpot, ficheiro «Ariadne Design System», página «Brand guide»).
+   Fonte de verdade: os tokens do Penpot (conjunto «Ariadne»), as cores e as tipografias da biblioteca e os
+   componentes da secção «05 · Components». Nada aqui se inventa: se mudar no Penpot, muda aqui.
+
+   Regra do DS: um só tema, o escuro. O fundo é sempre Ink. */
+
+/* Fontes self-hosted (SIL OFL), sem pedidos a terceiros. Só os pesos que o DS usa. */
+@import "@fontsource/cormorant-garamond/latin-600.css";
+@import "@fontsource/ibm-plex-sans/latin-400.css";
+@import "@fontsource/ibm-plex-sans/latin-500.css";
+@import "@fontsource/ibm-plex-sans/latin-600.css";
+@import "@fontsource/ibm-plex-mono/latin-400.css";
+@import "@fontsource/ibm-plex-mono/latin-500.css";
+@import "@fontsource/gfs-didot/greek-400.css";
+@import "@fontsource/gfs-didot/latin-400.css";
+
+:root {
+  color-scheme: dark;
+
+  /* Cor (tokens color.*). */
+  --ink: #0e0d0b; /* fundo */
+  --ink-2: #17150f; /* superfícies: cartões, painéis */
+  --ink-0: #0a0908; /* blocos de código, campos de formulário */
+  --line: #2c2822; /* bordas, divisórias */
+  --wall: #4a443a; /* paredes do labirinto, bordas fortes */
+  --stone: #9c9484; /* texto secundário, etiquetas */
+  --muted: #b5ad9e; /* texto terciário sobre escuro */
+  --body: #d9d1c3; /* texto corrido */
+  --bone: #ece5d8; /* títulos, botões primários */
+  --thread: #e2502a; /* o fio: gráficos e texto ≥ 24 px */
+  --thread-text: #f2734d; /* o fio em texto pequeno */
+
+  /* Tons do aviso («Notice») e do selo «Blocked»: vêm dos componentes do DS, não são tokens do Penpot. */
+  --thread-wash: #2a140d;
+  --thread-edge: #8c3a22;
+  --thread-edge-strong: #b5482a;
+
+  /* Espaço (tokens space.* e a escala da secção «06 · Layout»), em px. */
+  --space-xs: 4px;
+  --space-s: 8px;
+  --space-12: 12px;
+  --space-m: 16px;
+  --space-l: 24px;
+  --space-32: 32px;
+  --space-xl: 40px;
+  --space-48: 48px;
+  --space-section-mobile: 72px;
+  --space-section-desktop: 112px;
+  --gutter: 16px; /* telemóvel; 24 px a partir de 640 px, 40 px a partir de 1000 px */
+  --content-max: 1200px;
+
+  /* Forma. */
+  --radius: 2px; /* radius.base: botões e campos; cartões, etiquetas e avisos têm cantos vivos */
+  --border: 1px solid var(--line);
+
+  /* Famílias (tokens font.*). */
+  --font-display: "Cormorant Garamond", "Cormorant", Georgia, serif;
+  --font-text: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-numeral: "GFS Didot", "Cormorant Garamond", Georgia, serif;
+
+  /* Escala tipográfica (tipografias da biblioteca): tamanho / altura de linha / espaçamento entre letras. */
+  --fs-display: 94px;
+  --lh-display: 0.98;
+  --ls-display: -0.012em;
+  --fs-heading-2: 56px;
+  --lh-heading-2: 1.04;
+  --ls-heading-2: -0.005em;
+  --fs-figure: 72px;
+  --lh-figure: 1;
+  --fs-heading-3: 18px;
+  --lh-heading-3: 1.35;
+  --fs-lead: 19px;
+  --lh-lead: 1.65;
+  --fs-body: 17px;
+  --lh-body: 1.65;
+  --fs-small: 14.5px;
+  --lh-small: 1.55;
+  --fs-label: 12px;
+  --lh-label: 1.3;
+  --ls-label: 0.14em;
+  --fs-tag: 10.5px;
+  --ls-tag: 0.12em;
+  --fs-code: 13px;
+  --lh-code: 1.75;
+  --fs-numeral: 21px;
+
+  /* Acessibilidade. */
+  --target: 48px; /* altura dos botões */
+  --target-min: 44px; /* mínimo de qualquer alvo táctil */
+  --focus: 2px solid var(--thread-text);
+  --focus-offset: 3px;
+}
+
+/* Tom por nível de resposta (Kiwix → Wiki.js → semântico) e por série dos gráficos: o DS só tem um acento,
+   por isso os níveis distinguem-se por luminosidade da escala Bone → Stone → Wall; o fio fica para o que
+   é «o caminho, a resposta, a citação» (nível 3) e para o que falhou. */
+:root {
+  --level-1: var(--wall);
+  --level-2: var(--stone);
+  --level-3: var(--bone);
+  --level-empty: var(--thread);
+}

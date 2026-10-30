@@ -1,0 +1,57 @@
+/* Skin do kiwix-serve para o Ariadne: o mesmo design system do dashboard (web/) e do tema do Wiki.js.
+   Tokens e fontes vêm de skin/ariadne/ariadne.css (gerado no build a partir de deploy/tema-ariadne). */
+@import url("../skin/ariadne/ariadne.css?KIWIXCACHEID");
+
+*, *::before, *::after { box-sizing: border-box; }
+html { height: 100%; background: var(--ink); color-scheme: dark; }
+body {
+  position: relative; margin: 0; min-height: 100%;
+  background: var(--ink); color: var(--body);
+  font-family: var(--font-text); font-size: var(--fs-small); line-height: var(--lh-small);
+}
+a { color: var(--thread-text); text-decoration: none; }
+a:hover { color: var(--bone); text-decoration: underline; }
+:focus-visible { outline: var(--focus); outline-offset: var(--focus-offset); }
+::selection { background: var(--thread); color: var(--ink); }
+* { scrollbar-width: thin; scrollbar-color: var(--wall) var(--ink); }
+.hidden { visibility: hidden; }
+
+/* Marca: o ícone do fio e «Ariadne» em Cormorant, com a etiqueta do serviço em mono. */
+.brand { display: inline-flex; align-items: center; gap: var(--space-12); color: var(--bone); min-height: var(--target-min); }
+.brand:hover { color: var(--bone); text-decoration: none; }
+.brand svg { width: 28px; height: 28px; flex: none; }
+.brand__name { font-family: var(--font-display); font-weight: 600; font-size: 2rem; line-height: 1; }
+.brand__tag {
+  font-family: var(--font-mono); font-weight: 500; font-size: var(--fs-label); line-height: var(--lh-label);
+  letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--stone);
+}
+
+/* «A carregar»: sem rodas a girar (o DS só anima o fio); uma linha do fio e o texto. */
+.loader {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  display: flex; align-items: center; gap: var(--space-m); white-space: nowrap; min-width: fit-content;
+  background: var(--ink-2); border: var(--border); padding: var(--space-m) var(--space-l);
+  font-family: var(--font-mono); font-weight: 500; font-size: var(--fs-label); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--stone);
+}
+.spinner { width: 32px; height: 2px; background: var(--thread); }
+
+/* Janela do seletor de língua: «Card». */
+.modal-wrapper {
+  position: fixed; z-index: 100; inset: 0; display: flex; justify-content: center; align-items: center;
+  background: rgba(10, 9, 8, 0.8);
+}
+.modal { color: var(--body); width: 280px; margin: var(--space-m); background: var(--ink-2); border: var(--border); border-radius: 0; }
+.modal-heading { display: flex; justify-content: space-between; align-items: center; border-bottom: var(--border); padding: 0 0 0 var(--space-m); min-height: var(--target); }
+.modal-title {
+  font-family: var(--font-mono); font-weight: 500; font-size: var(--fs-label); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--stone);
+}
+.modal-close-button { cursor: pointer; display: flex; justify-content: center; align-items: center; min-width: var(--target-min); min-height: var(--target-min); color: var(--bone); }
+.modal-content { padding: var(--space-m); }
+#content_iframe { background: #ffffff; }
+#uiLanguageSelector { display: none; }
+#uiLanguageSelector .modal-content #ui_language {
+  width: 100%; min-height: var(--target); color: var(--bone); background: var(--ink-0); border: var(--border); border-radius: var(--radius); padding: 0 var(--space-12); font: inherit;
+}
+#uiLanguageSelectorButton { margin: 0 var(--space-s); cursor: pointer; height: 28px; width: 28px; vertical-align: middle; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }

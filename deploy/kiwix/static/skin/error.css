@@ -1,0 +1,26 @@
+/* Páginas de erro (404, 500, ligação externa): o «Notice» do DS, centrado, com o fio na borda. */
+@import url("../skin/ariadne/ariadne.css?KIWIXCACHEID");
+* { box-sizing: border-box; }
+html { background: var(--ink); color-scheme: dark; }
+body { margin: 0; min-height: 100vh; background: var(--ink); color: var(--body); font-family: var(--font-text); font-size: var(--fs-body); line-height: var(--lh-body); }
+a, a:visited { color: var(--thread-text); text-decoration: none; word-break: break-all; }
+a:hover { color: var(--bone); text-decoration: underline; }
+:focus-visible { outline: var(--focus); outline-offset: var(--focus-offset); }
+header { width: 100%; margin: 0 auto var(--space-l); padding-top: var(--space-section-mobile); text-align: center; }
+header img { width: 160px; max-width: 50%; height: auto; opacity: .9; }
+section { display: flex; flex-direction: column; align-items: center; }
+.intro { padding: 0 var(--gutter); text-align: center; }
+.intro h1 { margin: 0 0 var(--space-12); font-family: var(--font-display); font-weight: 600; font-size: clamp(2.25rem, 4.2vw, var(--fs-heading-2)); line-height: var(--lh-heading-2); letter-spacing: var(--ls-heading-2); color: var(--bone); }
+.intro p { margin: 0 0 var(--space-12); max-width: 64ch; }
+.intro code { font-family: var(--font-mono); font-size: var(--fs-code); color: var(--bone); background: var(--ink-0); border: var(--border); border-radius: var(--radius); padding: 1px 6px; word-break: break-all; }
+.advice {
+  width: min(70ch, calc(100% - 2 * var(--gutter))); margin: var(--space-xl) auto var(--space-section-mobile); padding: var(--space-m) var(--space-l);
+  align-items: normal; background: var(--thread-wash); border: 1px solid var(--thread-edge); border-left: 4px solid var(--thread); border-radius: 0; font-size: var(--fs-small); line-height: var(--lh-small);
+}
+.advice p { margin: 0 0 var(--space-12); }
+.advice p.list-intro { margin: 0; }
+.advice ul { margin: 0; padding: 0 var(--space-m); list-style: square; }
+.advice ul li { line-height: 2; }
+.advice p:last-child { margin-bottom: 0; }
+@media (min-width: 640px) { :root { --gutter: 24px; } }
+@media (min-width: 1000px) { :root { --gutter: 40px; } header { padding-top: var(--space-section-desktop); } }

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+
+    <link type="text/css" href="./skin/search_results.css?KIWIXCACHEID" rel="Stylesheet" />
+    <title>{{PAGE_TITLE}}</title>
+  </head>
+  <body>
+    <div class="header">
+      {{{PAGE_HEADER}}}
+    </div>
+
+    <div class="results">
+      <ul>
+        {{#results.items}}
+          <li>
+            <a href="{{{absolutePath}}}">
+              {{title}}
+            </a>
+            {{#snippet}}
+              <cite>{{{snippet}}}...</cite>
+            {{/snippet}}
+            {{#bookInfo}}
+              <div class="book-title">{{{bookInfo}}}</div>
+            {{/bookInfo}}
+            {{#wordCountInfo}}
+              <div class="informations">{{wordCountInfo}}</div>
+            {{/wordCountInfo}}
+          </li>
+        {{/results.items}}
+      </ul>
+    </div>
+
+    <div class="footer">
+      {{#pagination.hasPages}}
+        <ul>
+          {{#pagination.pages}}
+            <li>
+              <a {{#current}}class="selected"{{/current}}
+                 href="{{{query.unpaginatedQuery}}}&start={{start}}&pageLength={{pagination.itemsPerPage}}">
+                {{label}}
+              </a>
+            </li>
+          {{/pagination.pages}}
+        </ul>
+      {{/pagination.hasPages}}
+    </div>
+  </body>
+</html>

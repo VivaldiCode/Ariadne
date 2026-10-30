@@ -1,0 +1,11 @@
+# O modelo do curador do standalone (perfil `llm`), fixado: ficheiro, revisão, tamanho e sha256. O
+# entrypoint só aceita um ficheiro que bata certo com isto. É mais pequeno do que o do curador com GPU
+# (deploy/mac-curator, Gemma 3 12B com Metal) porque aqui corre só em CPU, sem AVX. Para trocar de
+# modelo muda-se este ficheiro (num commit) e reconstrói-se a imagem. Formato: shell (source).
+MODEL_REPO="ggml-org/gemma-3-4b-it-GGUF"
+MODEL_REVISION="d0976223747697cb51e056d85c532013931fe52e"
+MODEL_FILE="gemma-3-4b-it-Q4_K_M.gguf"
+MODEL_BYTES=2489757856
+MODEL_SHA256="882e8d2db44dc554fb0ea5077cb7e4bc49e7342a1f0da57901c0802ea21a0863"
+# O nome que o servidor anuncia em /v1/models: é o CURATOR_MODEL do Ariadne.
+MODEL_ALIAS="gemma-3-4b-it"

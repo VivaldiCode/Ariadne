@@ -1,0 +1,16 @@
+# Publica no anfitrião as portas dos serviços internos, para testes e manutenção (a suite do server, psql, …).
+# Uso, no .env:
+#   COMPOSE_FILE=docker-compose.yml:deploy/standalone/ports.yml
+#   PUBLISH_ADDRESS=…   # o mesmo das portas da raiz (o init-env.sh põe o loopback); sem omissão de propósito
+# Os serviços dos perfis desligados não sobem: as portas deles também não.
+services:
+  postgres:
+    ports: ["${PUBLISH_ADDRESS:?defina PUBLISH_ADDRESS no .env}:${POSTGRES_PORT:-5432}:5432"]
+  calibre:
+    ports: ["${PUBLISH_ADDRESS:?defina PUBLISH_ADDRESS no .env}:${CALIBRE_PORT:-8807}:8080"]
+  jobe-gateway:
+    ports: ["${PUBLISH_ADDRESS:?defina PUBLISH_ADDRESS no .env}:${JOBE_PORT:-8804}:80"]
+  libretranslate:
+    ports: ["${PUBLISH_ADDRESS:?defina PUBLISH_ADDRESS no .env}:${LIBRETRANSLATE_PORT:-8803}:5000"]
+  curator:
+    ports: ["${PUBLISH_ADDRESS:?defina PUBLISH_ADDRESS no .env}:${CURATOR_PORT:-8085}:8085"]

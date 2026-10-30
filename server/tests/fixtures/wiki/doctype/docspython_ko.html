@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+
+<html data-content_root="../" lang="ko">
+<head>
+
+
+
+
+
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="base64 — Base16, Base32, Base64, Base85 데이터 인코딩" property="og:title"/>
+<meta content="website" property="og:type"/>
+<meta content="https://docs.python.org/3/library/base64.html" property="og:url"/>
+<meta content="Python documentation" property="og:site_name"/>
+<meta content="소스 코드: Lib/base64.py 이 모듈은 바이너리 데이터를 인쇄 가능한 ASCII 문자로 인코딩하고 이러한 인코딩을 다시 바이너리 데이터로 디코딩하는 함수를 제공합니다. Base16, Base32 및 Base64 알고리즘을 정의하는 RFC 4648 에 지정된 인코딩과 사실상의 표준인 Ascii85와 Base85 인코딩에 대한 인코딩과 디코딩 함..." property="og:description"/>
+<meta content="1146" property="og:image:width"/>
+<meta content="600" property="og:image:height"/>
+<meta content="https://docs.python.org/3.12/ko/_images/social_previews/summary_library_base64_9e6a96c7.png" property="og:image"/>
+<meta content="소스 코드: Lib/base64.py 이 모듈은 바이너리 데이터를 인쇄 가능한 ASCII 문자로 인코딩하고 이러한 인코딩을 다시 바이너리 데이터로 디코딩하는 함수를 제공합니다. Base16, Base32 및 Base64 알고리즘을 정의하는 RFC 4648 에 지정된 인코딩과 사실상의 표준인 Ascii85와 Base85 인코딩에 대한 인코딩과 디코딩 함..." property="og:image:alt"/>
+<meta content="소스 코드: Lib/base64.py 이 모듈은 바이너리 데이터를 인쇄 가능한 ASCII 문자로 인코딩하고 이러한 인코딩을 다시 바이너리 데이터로 디코딩하는 함수를 제공합니다. Base16, Base32 및 Base64 알고리즘을 정의하는 RFC 4648 에 지정된 인코딩과 사실상의 표준인 Ascii85와 Base85 인코딩에 대한 인코딩과 디코딩 함..." name="description"/>
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="#3776ab" name="theme-color"/>
+<title>base64 — Base16, Base32, Base64, Base85 데이터 인코딩 — Python 3.12.13 문서</title><meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<meta content="1" name="readthedocs-addons-api-version"/>
+</head>
+<body>
+<div class="mobile-nav">
+
+
+<div class="menu-wrapper">
+<nav aria-label="main navigation" class="menu" role="navigation">
+
+<label class="theme-selector-label">
+    테마
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+<option selected="" value="auto">자동</option>
+<option value="light">라이트</option>
+<option value="dark">다크</option>
+</select>
+</label>
+<div>
+<h3><a href="../contents.html">목차</a></h3>
+<ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">base64</span></code> — Base16, Base32, Base64, Base85 데이터 인코딩</a><ul>
+<li><a class="reference internal" href="#security-considerations">Security Considerations</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div>
+<h4>이전 항목</h4>
+<p class="topless"><a href="mimetypes.html" title="이전 장"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mimetypes</span></code> — 파일명을 MIME 유형에 매핑</a></p>
+</div>
+<div>
+<h4>다음 항목</h4>
+<p class="topless"><a href="binascii.html" title="다음 장"><code class="xref py py-mod docutils literal notranslate"><span class="pre">binascii</span></code> — 바이너리와 ASCII 간의 변환</a></p>
+</div>
+<div aria-label="source link" role="note">
+<h3>이 페이지</h3>
+<ul class="this-page-menu">
+<li><a href="../bugs.html">버그 보고하기</a></li>
+<li>
+<a href="https://github.com/python/cpython/blob/main/Doc/library/base64.rst" rel="nofollow">소스 보기
+        </a>
+</li>
+</ul>
+</div>
+</nav>
+</div>
+</div>
+<div aria-label="Related" class="related" role="navigation">
+<h3>내비게이션</h3>
+<ul>
+<li class="right">
+<a accesskey="I" href="../genindex.html" title="전체 색인">색인</a></li>
+<li class="right">
+<a href="../py-modindex.html" title="Python 모듈 목록">모듈</a> |</li>
+<li class="right">
+<a accesskey="N" href="binascii.html" title="binascii — 바이너리와 ASCII 간의 변환">다음</a> |</li>
+<li class="right">
+<a accesskey="P" href="mimetypes.html" title="mimetypes — 파일명을 MIME 유형에 매핑">이전</a> |</li>
+
+<li><a href="https://www.python.org/">Python</a> »</li>
+
+
+<li id="cpython-language-and-version">
+<a href="https://docs.python.org/ko/3.12/index.html">3.12.13 Documentation</a> »
+    </li>
+<li class="nav-item nav-item-1"><a href="index.html">파이썬 표준 라이브러리</a> »</li>
+<li class="nav-item nav-item-2"><a accesskey="U" href="netdata.html">인터넷 데이터 처리</a> »</li>
+<li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">base64</span></code> — Base16, Base32, Base64, Base85 데이터 인코딩</a></li>
+<li class="right">
+
+                     |
+                </li>
+<li class="right">
+<label class="theme-selector-label">
+    테마
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+<option selected="" value="auto">자동</option>
+<option value="light">라이트</option>
+<option value="dark">다크</option>
+</select>
+</label> |</li>
+</ul>
+</div>
+<div class="document">
+<div class="documentwrapper">
+<div class="bodywrapper">
+<div class="body" role="main">
+<section id="module-base64">
+<h1 class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">base64</span></code> — Base16, Base32, Base64, Base85 데이터 인코딩<a class="headerlink" href="#module-base64" title="Link to this heading">¶</a></h1>
+<p class="translated"><strong>소스 코드:</strong> <a class="extlink-source reference external" href="https://github.com/python/cpython/tree/3.12/Lib/base64.py">Lib/base64.py</a></p>
+
+<p class="translated">이 모듈은 바이너리 데이터를 인쇄 가능한 ASCII 문자로 인코딩하고 이러한 인코딩을 다시 바이너리 데이터로 디코딩하는 함수를 제공합니다. Base16, Base32 및 Base64 알고리즘을 정의하는 <a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4648.html"><strong>RFC 4648</strong></a>에 지정된 인코딩과 사실상의 표준인 Ascii85와 Base85 인코딩에 대한 인코딩과 디코딩 함수를 제공합니다.</p>
+<p class="translated"><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4648.html"><strong>RFC 4648</strong></a> 인코딩은 전자 우편으로 안전하게 보내거나, URL의 일부로 사용하거나, HTTP POST 요청의 일부로 포함 할 수 있도록 바이너리 데이터를 인코딩하는 데 적합합니다. 인코딩 알고리즘은 <strong class="program">uuencode</strong> 프로그램과 다릅니다.</p>
+<p class="translated">이 모듈은 두 개의 인터페이스를 제공합니다. 최신 인터페이스는 <a class="reference internal" href="../glossary.html#term-bytes-like-object"><span class="xref std std-term">바이트열류 객체</span></a>를 ASCII <a class="reference internal" href="stdtypes.html#bytes" title="bytes"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>로 인코딩하고, <a class="reference internal" href="../glossary.html#term-bytes-like-object"><span class="xref std std-term">바이트열류 객체</span></a>나 ASCII를 포함하는 문자열을 <a class="reference internal" href="stdtypes.html#bytes" title="bytes"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>로 디코딩하는 것을 지원합니다. <a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4648.html"><strong>RFC 4648</strong></a>에 정의된 두 가지(일반, 그리고 URL과 파일 시스템에서 안전한) base-64 알파벳이 모두 지원됩니다.</p>
+<p class="translated">레거시 인터페이스는 문자열로부터의 디코딩을 지원하지 않지만, <a class="reference internal" href="../glossary.html#term-file-object"><span class="xref std std-term">파일 객체</span></a>에서 인코딩과 디코딩하는 함수를 제공합니다. Base64 표준 알파벳만 지원하며, <a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2045.html"><strong>RFC 2045</strong></a>에 따라 76자마다 개행 문자를 추가합니다.  지원을 원한다면 아마도 대신  패키지를 보고 싶을 것입니다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</section>
+
+</div>
+</div>
+</div>
+
+
+</div>
+
+
+
+</body>
+</html>

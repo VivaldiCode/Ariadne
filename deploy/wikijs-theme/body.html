@@ -1,0 +1,18 @@
+<script>
+/* Tema Ariadne: no telemóvel as tabelas largas viram cartões (regra do DS). Cada célula leva o nome da sua coluna
+   em data-label, que o CSS mostra à esquerda do valor. Só apresentação; não toca no conteúdo. */
+(function () {
+  function label() {
+    document.querySelectorAll(".contents table").forEach(function (table) {
+      var heads = Array.prototype.map.call(table.querySelectorAll("thead th"), function (th) { return th.textContent.trim(); });
+      table.querySelectorAll("tbody tr").forEach(function (row) {
+        Array.prototype.forEach.call(row.children, function (cell, i) {
+          if (cell.tagName === "TD" && heads[i] !== undefined && cell.getAttribute("data-label") !== heads[i]) cell.setAttribute("data-label", heads[i]);
+        });
+      });
+    });
+  }
+  new MutationObserver(label).observe(document.documentElement, { childList: true, subtree: true });
+  label();
+})();
+</script>

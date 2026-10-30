@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{translations.download-links-title}}</title>
+    <link type="text/css" href="{{root}}/skin/kiwix.css?KIWIXCACHEID" rel="Stylesheet" />
+</head>
+<style>
+    body { padding: var(--space-xl) var(--gutter); max-width: 70ch; margin: 0 auto; font-size: var(--fs-body); line-height: var(--lh-body); }
+    .downloadLinksTitle { font-family: var(--font-display); font-weight: 600; font-size: clamp(2rem, 4vw, 3rem); line-height: var(--lh-heading-2); color: var(--bone); margin-bottom: var(--space-m); }
+    body > a { display: block; min-height: var(--target-min); }
+</style>
+<body>
+    <div class="downloadLinksTitle">
+        {{{translations.download-links-heading}}}
+    </div>
+    <a href="{{url}}" download>
+        <div>{{translations.direct-download-link-text}}</div>
+    </a>
+    <a href="{{url}}.sha256" download>
+        <div>{{translations.hash-download-link-text}}</div>
+    </a>
+    <a href="{{url}}.magnet" target="_blank">
+        <div>{{translations.magnet-link-text}}</div>
+    </a>
+    <a href="{{url}}.torrent" download>
+        <div>{{translations.torrent-download-link-text}}</div>
+    </a>
+</body>
+</html>

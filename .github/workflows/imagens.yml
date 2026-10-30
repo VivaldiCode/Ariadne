@@ -1,0 +1,89 @@
+name: Imagens
+
+# Constrói as imagens do compose standalone e publica-as no registo público (GHCR deste repositório).
+# Corre numa tag de versão (v*) ou à mão. O registo está na variável de repositório IMAGE_REGISTRY
+# (Settings → Secrets and variables → Actions → Variables); sem ela usa ghcr.io/<dono do repositório>.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag a publicar (ex.: v0.1.0). Vazio = o nome do ref."
+        required: false
+      publicar:
+        description: "Publicar no registo (false = só construir)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  # Variável do repositório; o tipo «registo/dono» sem barra final.
+  IMAGE_REGISTRY: ${{ vars.IMAGE_REGISTRY || format('ghcr.io/{0}', github.repository_owner) }}
+  # Só amd64 por omissão (o alvo é um x86-64 sem AVX). Acrescentar linux/arm64 aqui se for preciso.
+  IMAGE_PLATFORMS: ${{ vars.IMAGE_PLATFORMS || 'linux/amd64' }}
+
+jobs:
+  imagens:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { nome: ariadne-server,  contexto: ".",              dockerfile: server/Dockerfile }
+          - { nome: ariadne-kiwix,   contexto: deploy,           dockerfile: deploy/kiwix/Dockerfile }
+          - { nome: ariadne-moodle,  contexto: deploy/moodle,    dockerfile: deploy/moodle/Dockerfile }
+          - { nome: ariadne-calibre, contexto: deploy/calibre,   dockerfile: deploy/calibre/Dockerfile }
+          - { nome: ariadne-jobe,    contexto: deploy/jobe,      dockerfile: deploy/jobe/Dockerfile }
+          - { nome: ariadne-curator, contexto: deploy/curator,   dockerfile: deploy/curator/Dockerfile }
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Há Dockerfile?
+        id: existe
+        run: |
+          if [ -f "${{ matrix.dockerfile }}" ]; then echo "sim=true" >> "$GITHUB_OUTPUT"; else echo "sim=false" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Tags
+        if: steps.existe.outputs.sim == 'true'
+        id: tags
+        run: |
+          # O registo e o nome da imagem em minúsculas (o GHCR recusa maiúsculas).
+          imagem=$(echo "${IMAGE_REGISTRY}/${{ matrix.nome }}" | tr '[:upper:]' '[:lower:]')
+          versao="${{ inputs.tag || github.ref_name }}"
+          tags="${imagem}:${versao}"
+          case "$versao" in v[0-9]*) tags="${tags},${imagem}:latest" ;; esac
+          echo "imagem=${imagem}" >> "$GITHUB_OUTPUT"
+          echo "tags=${tags}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-qemu-action@v3
+        if: steps.existe.outputs.sim == 'true'
+      - uses: docker/setup-buildx-action@v3
+        if: steps.existe.outputs.sim == 'true'
+
+      - name: Entrar no registo
+        if: steps.existe.outputs.sim == 'true' && (github.event_name == 'push' || inputs.publicar)
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ startsWith(env.IMAGE_REGISTRY, 'ghcr.io') && 'ghcr.io' || '' }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Construir${{ (github.event_name == 'push' || inputs.publicar) && ' e publicar' || '' }}
+        if: steps.existe.outputs.sim == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.contexto }}
+          file: ${{ matrix.dockerfile }}
+          platforms: ${{ env.IMAGE_PLATFORMS }}
+          push: ${{ github.event_name == 'push' || inputs.publicar }}
+          tags: ${{ steps.tags.outputs.tags }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=AGPL-3.0-only
+          cache-from: type=gha,scope=${{ matrix.nome }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.nome }}

@@ -1,0 +1,68 @@
+<html>
+<head>
+
+
+<!-- WB Insert -->
+<script src="../../../../../_zim_static/wombat.js"></script>
+<script src="../../../../../_zim_static/wombatSetup.js"></script>
+<script>
+  // Get the current url we are serving from.
+  // We cannot know it at zim creation as it depends of our server.
+  const current_url = (function () {
+    var href = new URL(window.location.href);
+    href.hash = "";
+
+    return href.toString();
+  })();
+
+  const wbinfo = wombatSetup.getWombatInfo(
+    current_url,
+    "www.cd3wdproject.org",
+    "https",
+    "https://www.cd3wdproject.org/INPHO/COOKBOOK/RECIPES/RCS/DEFAULT.HTM",
+    current_url.substring(0, current_url.length - ("www.cd3wdproject.org/INPHO/COOKBOOK/RECIPES/RCS/DEFAULT.HTM".length))
+  );
+
+  if (window && window._WBWombatInit) {
+    window._WBWombatInit(wbinfo);
+  }
+</script>
+
+
+<!-- End WB Insert -->
+<title>INPhO</title>
+<script async src="../../../../../www.googletagmanager.com/gtag/js%3Fid%3DG-G131K3Z71Y"></script>
+<script>var _____WB$wombat$assign$function_____ = function(name) {return (self._wb_wombat && self._wb_wombat.local_init && self._wb_wombat.local_init(name)) || self[name]; };
+if (!self.__WB_pmw) { self.__WB_pmw = function(obj) { this.__WB_source = obj; return this; } }
+{
+let window = _____WB$wombat$assign$function_____("window");
+let globalThis = _____WB$wombat$assign$function_____("globalThis");
+let self = _____WB$wombat$assign$function_____("self");
+let document = _____WB$wombat$assign$function_____("document");
+let location = _____WB$wombat$assign$function_____("location");
+let top = _____WB$wombat$assign$function_____("top");
+let parent = _____WB$wombat$assign$function_____("parent");
+let frames = _____WB$wombat$assign$function_____("frames");
+let opener = _____WB$wombat$assign$function_____("opener");
+let arguments;
+
+
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-G131K3Z71Y');
+
+}</script>
+
+</head>
+
+<!--<FRAMESET ROWS="10%,40%,*">-->
+<frameset rows="100%,*" border="no">
+
+        <frame src="MAT_EQ.HTM" name="WINCENTER"> 
+       
+        <frame src="DEF_3.HTM" name="WINBOTTOM">
+
+</frameset> 
+
+</html>

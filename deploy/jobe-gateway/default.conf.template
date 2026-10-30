@@ -1,0 +1,62 @@
+# Porta de entrada do Jobe (modelo do nginx:alpine: o envsubst só troca as variáveis de ambiente definidas).
+# Autentica com a chave de API (X-API-KEY), limita os pedidos por cliente e só deixa passar a API REST do Jobe.
+
+map "${JOBE_API_KEY}" $jobe_key_missing {
+    ""      1;
+    default 0;
+}
+
+limit_req_zone $binary_remote_addr zone=jobe_clients:1m rate=${JOBE_RATE_LIMIT}r/s;
+limit_conn_zone $binary_remote_addr zone=jobe_conns:1m;
+
+server {
+    listen 80;
+    server_name _;
+
+    client_max_body_size 1m;
+    client_body_timeout 10s;
+    client_header_timeout 10s;
+    send_timeout 120s;
+    server_tokens off;
+
+    # Resolução dinâmica (o Jobe pode ser recriado com outro IP): o `resolver` vem de 15-resolver.sh, que o
+    # escreve em /etc/nginx/conf.d/00-resolver.conf a partir do /etc/resolv.conf do contentor.
+
+    # Estado do próprio gateway (sem chave, sem tocar no Jobe): usado pelo healthcheck do compose.
+    location = /healthz {
+        access_log off;
+        default_type text/plain;
+        return 200 "ok\n";
+    }
+
+    location /jobe/index.php/restapi/ {
+        # Quem pode chamar: a rede interna do compose (JOBE_ALLOW_INTERNAL: o server e o worker, por `jobe-access`) e
+        # JOBE_ALLOW (`all` ou um IP/CIDR; no ambiente, o Moodle do NAS). Todas as variáveis têm de existir (envsubst).
+        allow ${JOBE_ALLOW_INTERNAL};
+        allow ${JOBE_ALLOW};
+        deny all;
+        # Sem chave configurada (JOBE_API_KEY vazio) o "" == "" deixaria passar tudo: recusa sempre.
+        if ($jobe_key_missing) {
+            return 401 "chave de API em falta ou errada\n";
+        }
+        if ($http_x_api_key != "${JOBE_API_KEY}") {
+            return 401 "chave de API em falta ou errada\n";
+        }
+        limit_req zone=jobe_clients burst=${JOBE_RATE_BURST} nodelay;
+        limit_req_status 429;
+        limit_conn jobe_conns ${JOBE_MAX_CONNECTIONS};
+        limit_conn_status 429;
+
+        set $jobe_upstream http://${JOBE_UPSTREAM};
+        proxy_pass $jobe_upstream;
+        proxy_set_header Host $host;
+        proxy_set_header X-API-KEY "";          # a chave fica no gateway: o Jobe nem a vê
+        proxy_connect_timeout 5s;
+        proxy_read_timeout 120s;
+        proxy_send_timeout 30s;
+    }
+
+    location / {
+        return 404;
+    }
+}

@@ -1,0 +1,68 @@
+/* Barra de topo do visualizador: a mesma barra do wiki e do dashboard (Ink 2, borda Line, marca à esquerda). */
+#kiwixtoolbar {
+  width: 100%; display: flex; align-items: center; gap: var(--space-m);
+  padding: var(--space-s) var(--gutter); min-height: 64px;
+  background: var(--ink-2); border-bottom: var(--border);
+}
+#kiwixtoolbar > a { float: none; }
+#kiwixfooter { text-align: center; margin-top: var(--space-m); }
+.height_separator { height: 3em; }
+
+.kiwix .kiwix_centered { flex: 1; min-width: 0; max-width: none; margin: 0; display: flex; align-items: center; gap: var(--space-m); }
+.kiwix_button_cont { display: flex !important; align-items: center; gap: var(--space-s); min-width: 0; }
+.kiwix_button_cont > a { display: inline-flex !important; min-width: 0; }
+#kiwix_serve_taskbar_book_ui_group { display: inline-flex; align-items: center; gap: var(--space-s); min-width: 0; }
+.kiwix .kiwix_searchform { order: 3; float: none; width: 22em; max-width: 100%; margin-left: auto; }
+.kiwixsearch { position: relative; height: var(--target-min); width: 100%; left: 0; margin: 0; font-size: inherit; }
+
+/* botões: contorno Bone, cantos de 2 px; o do livro corta o título com reticências */
+.kiwix #kiwixtoolbar button, .kiwix #kiwixtoolbar input[type="submit"] {
+  box-sizing: border-box !important; min-height: var(--target-min) !important; height: auto !important; margin: 0 !important; padding: 0 var(--space-12) !important;
+  display: inline-flex; align-items: center; gap: var(--space-s);
+  background: transparent !important; color: var(--bone) !important; border: 1px solid var(--bone) !important; border-radius: var(--radius) !important;
+  font: inherit !important; font-weight: 500 !important; font-size: 15px !important; line-height: 1.2 !important; cursor: pointer !important;
+}
+.kiwix #kiwixtoolbar button:hover { background: var(--bone) !important; color: var(--ink) !important; }
+#kiwix_serve_taskbar_library_button button { border-color: transparent !important; padding: 0 var(--space-s) !important; }
+#kiwix_serve_taskbar_library_button button:hover { background: transparent !important; color: var(--bone) !important; }
+#kiwix_serve_taskbar_library_button svg { width: 28px; height: 28px; flex: none; }
+#kiwix_serve_taskbar_library_button .brand__name { font-family: var(--font-display); font-weight: 600; font-size: 1.75rem !important; line-height: 1; }
+#kiwix_serve_taskbar_random_button button svg, #kiwix_serve_taskbar_random_button button svg * { stroke: currentColor; }
+#kiwix_serve_taskbar_random_button svg { width: 20px; height: 20px; }
+#kiwix_serve_taskbar_home_button button { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 30ch; display: inline-block; line-height: 40px !important; }
+
+.kiwix #kiwixtoolbar #kiwixsearchform input[type='text'] {
+  left: 0; box-sizing: border-box !important; width: 100%; height: var(--target-min) !important; line-height: 1.2 !important;
+  background-color: var(--ink-0) !important; color: var(--bone) !important; border: var(--border) !important; border-radius: var(--radius) !important;
+  padding: 0 var(--space-12) 0 36px !important; font: inherit !important; font-size: var(--fs-small) !important; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;
+}
+.kiwix #kiwixtoolbar #kiwixsearchform input[type='text']::placeholder { color: var(--stone); }
+.kiwix #kiwixtoolbar #kiwixsearchform input[type='text']:focus-visible { border-color: var(--thread-text) !important; outline-offset: 0; }
+label[for=kiwixsearchbox] { z-index: 1; position: absolute; left: var(--space-12); top: 0; height: 100%; display: flex; align-items: center; color: var(--stone); }
+label[for=kiwixsearchbox] svg { width: 16px; height: 16px; }
+
+#kiwix_button_show_toggle { display: none; }
+label[for="kiwix_button_show_toggle"] { display: none; align-items: center; height: var(--target-min); cursor: pointer; }
+label[for="kiwix_button_show_toggle"] img { height: 24px; filter: invert(1); transition: none; }
+#kiwix_button_show_toggle:checked ~ label img { transform: rotate(-180deg); }
+
+a.suggest, a.suggest:visited, a.suggest:hover, a.suggest:active { font-size: var(--fs-small); display: block; text-decoration: none; color: inherit; }
+.autoComplete_wrapper > ul { max-height: none !important; column-count: 1 !important; }
+
+@media (min-width: 640px) { :root { --gutter: 24px; } }
+@media (min-width: 1000px) { :root { --gutter: 40px; } }
+/* Telemóvel: a barra passa a duas linhas (marca e botões; pesquisa por baixo) e nada desliza para o lado. */
+@media (max-width: 859px) {
+  #kiwixtoolbar { flex-wrap: wrap; row-gap: var(--space-s); }
+  .kiwix .kiwix_centered { flex-wrap: wrap; flex: 1 1 100%; }
+  .kiwix .kiwix_searchform { order: 3; width: 100%; margin-left: 0; flex: 1 1 100%; }
+  #kiwix_serve_taskbar_home_button button { max-width: 18ch; }
+  .kiwix_button_cont { flex: 1; }
+}
+@media (max-width: 419px) {
+  label[for="kiwix_button_show_toggle"] { display: inline-flex; }
+  #kiwix_button_show_toggle:not(:checked) ~ label ~ .kiwix_button_cont { display: none !important; }
+  #kiwix_button_show_toggle:checked ~ label ~ .kiwix_button_cont { display: flex !important; }
+  #kiwix_button_show_toggle ~ label ~ .kiwix_button_cont.searching, label[for="kiwix_button_show_toggle"].searching { display: none !important; }
+  .kiwix .kiwix_centered { gap: var(--space-s); }
+}

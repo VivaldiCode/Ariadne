@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+
+<html class="client-nojs" dir="ltr" lang="en"><head>
+<meta charset="utf-8"/>
+<title>Eclean/ko</title>
+
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+
+ 
+ 
+<meta content="" name="ResourceLoaderDynamicStyles"/>
+
+
+
+
+
+
+
+</head>
+<body class="mwoffliner-fallback mediawiki ltr sitedir-ltr mw-hide-empty-elt ns-0 ns-subject page-Eclean_ko rootpage-Eclean skin-tyrian action-view">
+<div class="mw-body" id="content" role="main">
+
+<h1 class="firstHeading mw-first-heading" id="firstHeading">Eclean/ko</h1>
+<div id="bodyContent">
+
+<div class="mw-body-content mw-content-ltr" dir="ltr" id="mw-content-text" lang="ko"><div class="mw-parser-output">
+<div class="mw-content-ltr" dir="ltr" lang="en">
+<div class="list-group" id="infobox-stack">
+<div class="list-group-item text-center"><b>Resources</b></div>
+<div class="list-group-item" id="infobox"><span><a href="../Project%3APortage-Tools" title="Project:Portage-Tools">Project</a></span></div>
+<div class="list-group-item" id="infobox"><span><a class="external text" href="https://packages.gentoo.org/packages/app-portage/gentoolkit" rel="nofollow">Package information</a></span></div>
+<div class="list-group-item" id="infobox"><span><a class="external text" href="https://gitweb.gentoo.org/proj/gentoolkit.git" rel="nofollow">GitWeb</a></span></div>
+<div class="list-group-item" id="infobox"><span><a class="external text" href="https://bugs.gentoo.org/" rel="nofollow">Bugs (upstream)</a></span></div>
+</div>
+</div>
+<div class="mw-translate-fuzzy">
+<p><span class="tripleclick-separator">eclean</span>은 포티지 소스 파일과 바이너리 꾸러미를 제거하는 도구입니다. <span class="" title="External link for the app-portage/gentoolkit package."><a class="external text" href="https://packages.gentoo.org/packages/app-portage/gentoolkit" rel="nofollow"><span>app-portage/gentoolkit</span></a></span> 꾸러미의 일부이며, <a href="../Project%3APortage-Tools" title="Project:Portage-Tools">Portage-Tools 프로젝트</a>에서 관리합니다.
+</p>
+</div>
+<div class="mw-content-ltr" dir="ltr" lang="en">
+<p>Also available on Gentoo is the <a href="../Kernel/Removal/ko#Using_eclean-kernel" title="Kernel/Removal/ko">eclean-kernel</a> tool, available separately from the <span class="tripleclick-separator">eclean</span> tools installed with gentoolkit​, in the <span class="" title="External link for the app-admin/eclean-kernel package."><a class="external text" href="https://packages.gentoo.org/packages/app-admin/eclean-kernel" rel="nofollow"><span>app-admin/eclean-kernel</span></a></span> package. <span class="tripleclick-separator">eclean-kernel</span> is used to automate the clean up of old Linux kernels.
+</p>
+</div>
+<h2><span class="mw-headline" id=".EC.84.A4.EC.B9.98">설치</span></h2>
+<h3><span class="mw-headline" id="Emerge">Emerge</span></h3>
+<div class="mw-translate-fuzzy">
+<p><span class="tripleclick-separator">eclean</span>을 설치하십시오:
+</p>
+</div>
+<div class="cmd-box"><div><code>root <span>#</span></code><code>emerge --ask app-portage/gentoolkit</code></div></div>
+<div class="mw-translate-fuzzy">
+<div class="alert alert-info gw-box"><strong> 참고</strong><span class="" title="External link for the app-portage/gentoolkit package."><a class="external text" href="https://packages.gentoo.org/packages/app-portage/gentoolkit" rel="nofollow"><span>app-portage/gentoolkit</span></a></span> 꾸러미에 있는 다른 유틸리티 정보를 찾아보려면 <a href="../Gentoolkit/ko" title="Gentoolkit/ko">Gentoolkit 게시글</a>을 살펴보십시오.</div>
+</div>
+<h2><span class="mw-headline" id=".EC.82.AC.EC.9A.A9.EB.B2.95">사용법</span></h2>
+<div class="mw-translate-fuzzy">
+<p>기본적으로 소스 파일은  <span>/usr/portage/distfiles</span>  디렉터리에 있으며, 바이너리 꾸러미는 <span>/usr/portage/packages</span> 디렉터리에 있습니다. 각 용도의 위치는 <span>/etc/portage/make.conf</span>에 있는 <var>DISTDIR</var> 과  <code>PKGDIR</code>  변수 값으로 각각 바꿀 수 있습니다. 두 위치는 주기적으로 비우지 않으면 좀 커질 수 있습니다. 이러한 점이 <span class="tripleclick-separator">eclean</span>을 만든 이유입니다.
+</p>
+</div>
+<div class="mw-translate-fuzzy">
+<h3><span class="mw-headline" id=".EC.A0.84.EC.B2.B4_.EC.98.B5.EC.85.98_.EB.AA.A9.EB.A1.9D">전체 옵션 목록</span></h3>
+</div>
+<p>전체 동작 요약, 옵션 목록, 사용 방법 일체를 보려면 <span class="tripleclick-separator">eclean --help</span> 명령을 활용하십시오.
+</p>
+<div class="mw-translate-fuzzy">
+<div class="cmd-box"><div><code>user <span>$</span></code><code>eclean --help</code></div><pre>Usage:
+ eclean [global-option] ... &lt;action&gt; [action-option] ...
+ eclean-dist [global-option, distfiles-option] ...
+ eclean-pkg [global-option, packages-option] ...
+ eclean(-dist,-pkg) [--help, --version]
+ 
+Available global options:
+ -C, --nocolor             - turn off colors on output
+ -d, --deep                - only keep the minimum for a reinstallation
+ -e, --exclude-file=&lt;path&gt; - path to the exclusion file
+ -i, --interactive         - ask confirmation before deletions
+ -n, --package-names       - protect all versions (when --deep
+ -p, --pretend             - only display what would be cleaned
+ -q, --quiet               - be as quiet as possible
+ -t, --time-limit=&lt;time&gt;   - don't delete files modified since &lt;time&gt;
+   &lt;time&gt; is a duration: "1y" is "one year", "2w" is "two weeks", etc.
+   Units are: y (years), m (months), w (weeks), d (days) and h (hours).
+ -h, --help                - display the help screen
+ -V, --version             - display version info
+ 
+Available actions:
+ packages     - clean outdated binary packages from PKGDIR
+ distfiles    - clean outdated packages sources files from DISTDIR
+ 
+Available options for the packages action:
+ NONE  :)
+ 
+Available options for the distfiles action:
+ -f, --fetch-restricted   - protect fetch-restricted files (when --deep)
+ -s, --size-limit=&lt;size&gt;  - don't delete distfiles bigger than &lt;size&gt;
+   &lt;size&gt; is a size specification: "10M" is "ten megabytes", "200K" is
+   "two hundreds kilobytes", etc.  Units are: G, M, K and B.
+ 
+More detailed instruction can be found in `man eclean`
+</pre></div>
+</div>
+<h3><span class="mw-headline" id=".3D_distfiles_.EC.86.8C.EA.B1.B0">= distfiles 소거</span></h3>
+<p><code>distfiles</code> 인자를 전달하여 소스 파일 디렉터리를 지우십시오:
+</p>
+<div class="cmd-box"><div><code>root <span>#</span></code><code>eclean distfiles</code></div></div>
+<p>또는 단축 옵션을 실행하시면 됩니다:
+</p>
+<div class="cmd-box"><div><code>root <span>#</span></code><code>eclean-dist</code></div></div>
+<div class="mw-content-ltr" dir="ltr" lang="en">
+<p>If <code>distfiles</code> takes up too much space, perform a deep clean:
+</p>
+</div>
+<div class="mw-content-ltr" dir="ltr" lang="en">
+<div class="cmd-box"><div><code>root <span>#</span></code><code>eclean -d distfiles</code></div></div>
+</div>
+<h3><span class="mw-headline" id=".EA.BE.B8.EB.9F.AC.EB.AF.B8_.EC.A7.80.EC.9A.B0.EA.B8.B0">꾸러미 지우기</span></h3>
+<p>바이너리 꾸러미가 있는 디렉터리라면 대신 다음 명령을 사용하십시오:
+</p>
+<div class="cmd-box"><div><code>root <span>#</span></code><code>eclean packages</code></div></div>
+<p>또는 단축 옵션을 실행하시면 됩니다:
+</p>
+<div class="cmd-box"><div><code>root <span>#</span></code><code>eclean-pkg</code></div></div>
+<div class="mw-content-ltr" dir="ltr" lang="en">
+<h2><span class="mw-headline" id="Options">Options</span></h2>
+</div>
+<div class="mw-translate-fuzzy">
+<p>기본적으로, 소스 파일과 바이너리 꾸러미는 삭제하지 <b>않을</b> 현재 포티지 트리의 ebuild에 해당합니다. 이 대로라면 시스템 관리자는 쉽게 꾸러미를 다운그레이드하거나 이전에 제거한 꾸러미를 설치하고, 제공한 꾸러미는 현재 포티지 트리에 남습니다.
+</p>
+</div>
+<div class="mw-translate-fuzzy">
+<p>예제에서와 같이, foo-1.0 와 foo-1.1 꾸러미가 포티지 트리에 있다고 가정합니다. foo-1.0 에서 foo-1.1로 업데이트하고 나면 <span class="tripleclick-separator">eclean distfiles</span>을 실행하십시오. 두 버전의 소스 파일을 유지하므로  foo-1.1에 문제가 있다면, 사용자가 어떤 파일이든 다운로드하지 않아도 foo-1.0를 쉽게 다시 설치할 수 있습니다.
+</p>
+</div>
+<p>다른 가능한 경우는 앞서 제거한 꾸러미를 설치하는 경우입니다. foo(임의 버전) 꾸러미를 시스템에 설치했다고 치겠습니다. (우연히) 이 꾸러미를 삭제하고 를 실행한 후라면, foo 소스 파일을 유지하므로 어떤 파일도 다운로드하지 않고 다시 설치할 수 있습니다.
+</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div></div>
+</div>
+</div>
+</body></html>

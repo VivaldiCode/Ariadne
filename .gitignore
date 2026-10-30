@@ -1,0 +1,20 @@
+# Segredos e dados locais
+.env
+data/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# GGUF exportados no Mac (bench/embeddings/README.md)
+/gguf/
+
+# Sistema
+.DS_Store
+
+# Cache de modelos dos testes (server/tests)
+server/.cache/

@@ -1,0 +1,348 @@
+/* Tema do Wiki.js para o Ariadne: mesmo design system do dashboard (web/) e do skin do Kiwix.
+   Usa os tokens de tema-ariadne/tokens.css (que o build cola antes deste ficheiro) e só isso: nenhuma cor
+   ou medida fora dos tokens, excepto os tons do «Notice» que vêm do componente do DS.
+   Pensado para o Wiki.js 2.5 com «Modo escuro» ligado (Administração → Tema); cobre também o claro. */
+
+:root { color-scheme: dark; }
+@counter-style greek-numeral {
+  system: additive;
+  additive-symbols: 10 "Ι", 9 "Θ", 8 "Η", 7 "Ζ", 6 "Ϛ", 5 "Ε", 4 "Δ", 3 "Γ", 2 "Β", 1 "Α";
+  suffix: "ʹ";
+}
+
+/* ---- base ---- */
+html { background: var(--ink); }
+body, .v-application, .v-application--wrap {
+  background: var(--ink) !important;
+  color: var(--body) !important;
+}
+.v-application, .v-application .body-1, .v-application .body-2, .v-application .subtitle-1,
+.v-application .v-list-item__title, .v-application .v-btn, .v-application input, .v-application textarea {
+  font-family: var(--font-text) !important;
+}
+.v-application { font-size: var(--fs-small); line-height: var(--lh-small); }
+.v-application a { color: var(--thread-text); text-decoration: none; }
+.v-application a:hover { color: var(--bone); text-decoration: underline; }
+.v-application ::selection { background: var(--thread); color: var(--ink); }
+.v-application :focus-visible { outline: var(--focus) !important; outline-offset: var(--focus-offset); }
+.v-application hr, .v-application .v-divider { border-color: var(--line) !important; background: var(--line); opacity: 1; }
+.v-application .theme--dark.v-icon, .v-application .theme--light.v-icon { color: var(--stone); }
+.v-application .theme--dark.v-btn.v-btn--icon, .v-application .theme--light.v-btn.v-btn--icon { color: var(--stone); }
+.v-application .v-btn--icon:hover .v-icon { color: var(--bone); }
+.v-application .v-icon[class*="--text"] { color: var(--stone) !important; }
+.v-application .v-icon[class*="--text"]:hover { color: var(--bone) !important; }
+#root .v-application .indigo--text, #root .v-application .blue-grey--text, #root .v-application .teal--text,
+#root .v-application .blue--text[class*="text--"], #root .v-application .indigo--text[class*="text--"], #root .v-application .overline { color: var(--stone) !important; }
+.v-application .grey--text, .v-application .text--secondary { color: var(--stone) !important; }
+.v-application .grey--text.text--darken-3, .v-application .grey--text.text--darken-2 { color: var(--bone) !important; }
+.v-application .primary--text, .v-application .blue--text, .v-application .accent--text { color: var(--thread-text) !important; caret-color: var(--thread-text) !important; }
+.v-application .red--text, .v-application .error--text { color: var(--thread-text) !important; }
+.v-application .green--text, .v-application .success--text { color: var(--muted) !important; }
+.v-application .elevation-1, .v-application .elevation-2, .v-application .elevation-3, .v-application .elevation-4,
+.v-application .v-sheet, .v-application .v-card { box-shadow: none !important; }
+.v-application .v-sheet { border-radius: 0; }
+
+/* ---- cabeçalho: a barra de topo do dashboard, com a marca à esquerda e a pesquisa ao centro ---- */
+.nav-header, .nav-header .v-toolbar__content, .nav-header-inner,
+.v-application .nav-header-inner.black, .v-application .nav-header.black {
+  background: var(--ink-2) !important;
+  color: var(--body) !important;
+}
+.nav-header { border-bottom: var(--border) !important; box-shadow: none !important; }
+.nav-header-inner, .nav-header .v-toolbar__content { box-shadow: none !important; }
+/* Marca: o ícone do fio e «Ariadne» em Cormorant; o título do site fica escondido e substituído, para a marca
+   ser a mesma do dashboard mesmo que o Wiki.js tenha outro título nas definições. */
+.nav-header .v-avatar { width: 28px !important; height: 28px !important; min-width: 28px !important; }
+.nav-header .v-avatar img { content: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22 fill=%22none%22%3E%3Cpath d=%22M20 20h88v88H20zM42 42h44v44%22 stroke=%22%236b6355%22 stroke-width=%228%22/%3E%3Cpath d=%22M4 64h26V32h68v64H54V64h12%22 stroke=%22%23e2502a%22 stroke-width=%2210.4%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E%3C/svg%3E"); width: 28px !important; height: 28px !important; }
+.nav-header .v-toolbar__title { font-size: 0 !important; line-height: 1; display: flex; align-items: baseline; gap: var(--space-s); }
+.nav-header .v-toolbar__title::before {
+  content: "Ariadne"; font-family: var(--font-display); font-weight: 600; font-size: 2rem; line-height: 1; color: var(--bone);
+}
+.nav-header .v-toolbar__title::after {
+  content: "wiki"; font-family: var(--font-mono); font-weight: 500; font-size: var(--fs-label); line-height: var(--lh-label);
+  letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--stone);
+}
+.nav-header .v-toolbar__title a { color: var(--bone); }
+/* Pesquisa: campo «Ink 0», borda Line, 2 px de raio, 48 px de altura */
+.nav-header .v-text-field.v-text-field--solo .v-input__control { min-height: var(--target) !important; }
+.nav-header .v-text-field--solo .v-input__slot, .nav-header .v-text-field--solo-flat .v-input__slot {
+  background: var(--ink-0) !important; border: var(--border); border-radius: var(--radius) !important; box-shadow: none !important;
+}
+.nav-header .v-text-field--solo.v-input--is-focused .v-input__slot { border-color: var(--thread-text); }
+.nav-header .v-text-field input { color: var(--bone) !important; font-family: var(--font-text); font-size: var(--fs-small); }
+.nav-header .v-text-field input::placeholder, .nav-header .v-text-field .v-label { color: var(--stone) !important; }
+.v-application .nav-header .v-text-field input:focus-visible { outline: 0 !important; }
+.nav-header .v-text-field.v-input--is-focused .v-input__slot { border-color: var(--thread-text); }
+/* resultados da pesquisa: lista Ink 2; a entrada realçada leva o fio na borda esquerda (nada de gradientes) */
+.v-application .v-list-item.highlighted, .v-application .v-list-item.highlighted.theme--dark {
+  background: var(--ink-2) !important; background-image: none !important; border-left: 2px solid var(--thread); color: var(--bone) !important;
+}
+.v-application .v-list-item.highlighted .v-list-item__title { color: var(--bone) !important; font-weight: 600; }
+.v-application .v-list-item.highlighted .v-list-item__subtitle, .v-application .v-list-item.highlighted .grey--text { color: var(--stone) !important; }
+.v-application .v-list-item.highlighted .v-chip { color: var(--stone) !important; }
+.nav-header .v-btn--icon { width: var(--target-min) !important; height: var(--target-min) !important; }
+
+/* ---- navegação lateral: a barra do dashboard (Ink 2, borda à direita, numerais gregos) ---- */
+.v-navigation-drawer, .v-application .v-navigation-drawer.primary, .v-application .v-navigation-drawer .primary {
+  background: var(--ink-2) !important;
+  border-right: var(--border) !important;
+  color: var(--body) !important;
+}
+.v-navigation-drawer .v-navigation-drawer__border { display: none; }
+.v-navigation-drawer .v-btn { color: var(--bone) !important; }
+.v-navigation-drawer .v-list { counter-reset: module; background: transparent !important; padding: var(--space-s) var(--space-s) 0; }
+.v-navigation-drawer .v-list-item {
+  min-height: var(--target-min); border-radius: var(--radius); border-left: 2px solid transparent;
+  color: var(--body) !important; counter-increment: module;
+}
+.v-navigation-drawer .v-list-item:hover { background: var(--ink) !important; color: var(--bone) !important; }
+.v-application .v-navigation-drawer .v-list-item, .v-application .v-navigation-drawer .v-list-item--active { border: 0 !important; border-left: 2px solid transparent !important; outline: 0; }
+.v-application .v-navigation-drawer .v-list-item--active { background: var(--ink) !important; border-left-color: var(--thread) !important; color: var(--bone) !important; }
+.v-application .v-navigation-drawer .v-list-item:focus-visible { outline: var(--focus) !important; }
+.v-navigation-drawer .v-list-item .v-list-item__icon, .v-navigation-drawer .v-list-item .v-list-item__avatar { display: none; }
+#root .v-application .v-navigation-drawer .v-list-item--active, #root .v-application .v-navigation-drawer .v-list-item--active.theme--dark, #root .v-application .v-navigation-drawer .v-list-item--active.theme--light { background: var(--ink) !important; background-image: none !important; }
+#root .v-application .v-navigation-drawer .v-list-item--active .v-list-item__title { color: var(--bone) !important; }
+.v-navigation-drawer .v-list-item::after {
+  content: counter(module, greek-numeral); order: -1; font-family: var(--font-numeral); font-size: var(--fs-numeral); line-height: 1;
+  color: var(--stone); min-width: 1.6em; margin-right: var(--space-12);
+}
+.v-navigation-drawer .v-list-item--active::after { color: var(--thread-text); }
+.v-application .v-navigation-drawer .v-list-item::before, .v-application .v-navigation-drawer .v-list-item--active::before, .v-application .v-navigation-drawer .v-list-item:hover::before { opacity: 0 !important; }
+.v-navigation-drawer .v-list-item__title { color: inherit !important; font-size: var(--fs-small); font-weight: 500; }
+.v-navigation-drawer .v-list-item__icon .v-icon, .v-navigation-drawer .v-list-item .v-icon { color: var(--stone) !important; }
+.v-navigation-drawer .v-list-item--active .v-icon { color: var(--thread-text) !important; }
+.v-navigation-drawer .v-subheader {
+  font-family: var(--font-mono); font-weight: 500; font-size: var(--fs-label); letter-spacing: var(--ls-label);
+  text-transform: uppercase; color: var(--stone) !important;
+}
+.v-navigation-drawer .v-divider { border-color: var(--line) !important; }
+
+/* ---- página: título, barra do índice, conteúdo ---- */
+.v-navigation-drawer .blue.darken-3, .v-application .v-navigation-drawer .pa-3.d-flex { background: var(--ink-2) !important; }
+.v-application .v-navigation-drawer .v-btn:not(.v-btn--icon):not(.v-btn--fab):not(.x):not(.y) { background: transparent !important; color: var(--bone) !important; border: 1px solid var(--bone); }
+.v-application .v-navigation-drawer .v-btn:not(.v-btn--icon):not(.v-btn--fab):not(.x):not(.y):hover { background: var(--bone) !important; color: var(--ink) !important; }
+.v-application .v-navigation-drawer .v-btn:not(.v-btn--icon):hover .v-icon { color: var(--ink) !important; }
+.v-navigation-drawer .v-btn .v-icon { color: var(--bone) !important; }
+/* O Wiki.js pinta estas faixas com `#root .v-application .grey.darken-4-l3` (e parentes): o `#root` é preciso para as vencer. */
+#root .v-application .container.grey, #root .v-application .page-header-section .container { background: var(--ink) !important; border-bottom: var(--border); }
+#root .v-application .grey[class*="-l3"]:not(.v-btn):not(.container), #root .v-application .grey[class*="-d3"]:not(.v-btn):not(.container),
+#root .v-application .blue-grey[class*="-l3"]:not(.v-btn), #root .v-application .blue-grey[class*="-d3"]:not(.v-btn) { background-color: var(--ink-2) !important; }
+.page-header-headings { padding: var(--space-m) 0; }
+.page-header-headings .headline { font-family: var(--font-display) !important; font-weight: 600 !important; font-size: clamp(2.25rem, 4.2vw, 3.5rem) !important; line-height: var(--lh-heading-2) !important; letter-spacing: var(--ls-heading-2); color: var(--bone) !important; }
+.page-header-headings .caption { background: transparent !important; font-family: var(--font-text) !important; font-size: var(--fs-body) !important; line-height: var(--lh-body) !important; color: var(--stone) !important; letter-spacing: 0 !important; max-width: 64ch; }
+.v-main, .v-main__wrap { background: var(--ink) !important; }
+.page-col-content, .page-col-sd { color: var(--body); }
+.v-application .page-header, .v-application .v-toolbar.page-header, .v-application .page-header.grey,
+.v-application .page-header.grey.lighten-4, .v-application .page-header.grey.darken-3 {
+  background: var(--ink) !important; border-bottom: var(--border); box-shadow: none !important;
+}
+.page-header-headings .headline, .page-header .headline, .page-header .v-toolbar__title { font-family: var(--font-display) !important; font-weight: 600 !important; font-size: clamp(2.25rem, 4.2vw, 3.5rem) !important; line-height: var(--lh-heading-2) !important; letter-spacing: var(--ls-heading-2); color: var(--bone) !important; }
+.page-header-headings .caption, .page-header .subtitle-1, .page-header .caption, .page-header .v-toolbar__content .grey--text { color: var(--stone) !important; font-size: var(--fs-body); line-height: var(--lh-body); max-width: 64ch; }
+.v-breadcrumbs, .v-breadcrumbs li, .v-breadcrumbs a, .v-breadcrumbs__divider {
+  font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--stone) !important;
+}
+.v-breadcrumbs a:hover { color: var(--bone) !important; }
+.v-application .v-breadcrumbs .v-btn:not(.v-btn--icon) { min-height: var(--target-min); border: 0 !important; background: transparent !important; color: var(--stone) !important; padding: 0 var(--space-xs) !important; font-family: var(--font-mono); font-weight: 500; font-size: var(--fs-label); letter-spacing: var(--ls-label) !important; text-transform: uppercase !important; }
+.v-application .v-breadcrumbs .v-btn:not(.v-btn--icon):hover { color: var(--bone) !important; background: transparent !important; text-decoration: underline; }
+.v-application .grey.lighten-5, .v-application .grey.lighten-4, .v-application .grey.lighten-3, .v-application .grey.lighten-2,
+.v-application .blue-grey.lighten-5, .v-application .blue-grey.lighten-4, .v-application .blue-grey.lighten-5 { background-color: var(--ink-2) !important; }
+
+/* Cartões da coluna lateral («Card»: Ink 2, borda Line, cantos vivos) */
+.v-application .v-card, .v-application .v-card.theme--dark, .v-application .v-card.theme--light {
+  background: var(--ink-2) !important; border: var(--border) !important; color: var(--body) !important; border-radius: 0 !important;
+}
+.v-card .overline, .v-application .overline {
+  font-family: var(--font-mono) !important; font-weight: 500; font-size: var(--fs-label) !important; line-height: var(--lh-label);
+  letter-spacing: var(--ls-label) !important; text-transform: uppercase; color: var(--stone) !important;
+}
+.v-card .v-list-item__title, .v-card .v-list-item__subtitle { color: var(--body) !important; }
+.v-card .toc-item .v-list-item__title, .v-card .v-treeview-node__label { color: var(--body) !important; }
+.v-card .v-list-item--active .v-list-item__title { color: var(--bone) !important; }
+.v-application .v-treeview-node__root:hover::before, .v-application .v-treeview-node__root.v-treeview-node--active::before { background: var(--ink); opacity: 1; }
+.v-application .v-treeview-node--active, .v-application .v-treeview-node--active .v-treeview-node__label { color: var(--bone) !important; }
+.page-col-sd .v-toolbar, .page-col-sd .v-sheet.grey, .page-col-sd .v-card .v-toolbar { background: var(--ink-2) !important; }
+
+/* Etiquetas («Tag»: contorno Line, mono em maiúsculas, Stone) */
+.v-application .v-chip, .v-application .v-chip.v-size--small, .v-application .v-chip.v-size--default {
+  background: transparent !important; border: 1px solid var(--line) !important; border-radius: 0 !important; color: var(--stone) !important;
+  font-family: var(--font-mono); font-weight: 500; font-size: var(--fs-tag) !important; letter-spacing: var(--ls-tag); text-transform: uppercase; height: 24px !important;
+}
+.v-application .v-chip .v-icon, .v-application .v-chip .v-chip__content { color: var(--stone) !important; }
+.v-application .v-btn[class*="--text"]:not(.v-btn--icon):not(.v-btn--fab) { color: var(--bone) !important; }
+.v-application .v-chip:hover { border-color: var(--wall) !important; color: var(--bone) !important; }
+
+/* ---- botões («Button»: 48 px, 2 px de raio, o primário em Bone, o secundário em contorno Bone) ---- */
+.v-application .v-btn:not(.v-btn--icon):not(.v-btn--fab) {
+  min-height: var(--target); height: auto !important; padding: 0 20px !important; border-radius: var(--radius) !important;
+  font-family: var(--font-text); font-weight: 500; font-size: 15px; text-transform: none !important; letter-spacing: 0 !important;
+  background: transparent !important; color: var(--bone) !important; border: 1px solid var(--bone); box-shadow: none !important;
+}
+.v-application .v-btn:not(.v-btn--icon):not(.v-btn--fab):hover { background: var(--bone) !important; color: var(--ink) !important; }
+.v-application .v-btn:not(.v-btn--icon):not(.v-btn--fab).primary, .v-application .v-btn:not(.v-btn--icon):not(.v-btn--fab).blue,
+.v-application .v-btn:not(.v-btn--icon):not(.v-btn--fab).success, .v-application .v-btn:not(.v-btn--icon):not(.v-btn--fab).blue-grey {
+  background: var(--bone) !important; border-color: var(--bone) !important; color: var(--ink) !important;
+}
+.v-application .v-btn:not(.v-btn--icon):not(.v-btn--fab).primary:hover, .v-application .v-btn:not(.v-btn--icon):not(.v-btn--fab).blue:hover,
+.v-application .v-btn:not(.v-btn--icon):not(.v-btn--fab).success:hover, .v-application .v-btn:not(.v-btn--icon):not(.v-btn--fab).blue-grey:hover {
+  background: var(--body) !important; border-color: var(--body) !important; color: var(--ink) !important;
+}
+.v-application .v-btn:not(.v-btn--icon):not(.v-btn--fab).error, .v-application .v-btn:not(.v-btn--icon):not(.v-btn--fab).red {
+  background: transparent !important; color: var(--thread-text) !important; border-color: var(--thread-edge-strong);
+}
+.v-application .v-btn:not(.v-btn--icon):not(.v-btn--fab).error:hover { background: var(--thread-wash) !important; color: var(--thread-text) !important; }
+.v-application .v-btn.v-btn--disabled { color: var(--stone) !important; border-color: var(--wall) !important; background: transparent !important; }
+.v-application .v-btn.v-btn--disabled.primary { background: var(--wall) !important; }
+.v-application .v-btn--fab.primary, .v-application .v-btn--fab.blue, .v-application .v-btn--fab.green, .v-application .v-btn--fab.orange {
+  background: var(--bone) !important; color: var(--ink) !important; border-radius: var(--radius) !important; box-shadow: none !important;
+}
+.v-application .v-btn--fab .v-icon { color: var(--ink) !important; }
+.v-btn__content, .v-btn .v-btn__content { letter-spacing: 0; }
+.v-btn::before { display: none; }
+
+/* ---- campos de formulário («Ink 0», borda Line) ---- */
+.v-application .v-text-field--outlined fieldset, .v-application .v-text-field--filled .v-input__slot {
+  border-color: var(--line) !important; background: var(--ink-0) !important; border-radius: var(--radius) !important;
+}
+.v-application .v-input input, .v-application .v-input textarea, .v-application .v-select__selection, .v-application .v-label {
+  color: var(--bone) !important; font-family: var(--font-text);
+}
+.v-application .v-label { color: var(--stone) !important; }
+.v-application .v-input__slot:before { border-color: var(--line) !important; }
+.v-application .v-input--is-focused .v-input__slot:after, .v-application .v-input--is-focused fieldset { border-color: var(--thread-text) !important; }
+.v-application .v-menu__content, .v-application .v-list, .v-application .v-dialog, .v-application .v-dialog > .v-card {
+  background: var(--ink-2) !important; color: var(--body) !important; border: var(--border); box-shadow: none !important; border-radius: 0 !important;
+}
+.v-application .v-list-item:hover { background: var(--ink) !important; }
+.v-application .v-overlay__scrim, .v-application .v-overlay--active:before { background: var(--ink-0) !important; opacity: .8 !important; }
+.v-application .v-tooltip__content { background: var(--ink-0) !important; border: var(--border); border-radius: 0 !important; color: var(--bone); font-size: var(--fs-label); }
+.v-application .v-tabs-bar, .v-application .v-tab { background: transparent !important; color: var(--stone) !important; }
+.v-application .v-tab--active { color: var(--bone) !important; }
+.v-application .v-tabs-slider { background: var(--thread) !important; }
+.v-application .v-data-table, .v-application .v-data-table .v-data-table__wrapper { background: transparent !important; }
+.v-application .v-data-table th, .v-application .v-data-table td { border-color: var(--line) !important; color: var(--body) !important; }
+.v-application .v-data-table-header th { color: var(--stone) !important; font-family: var(--font-mono); font-size: var(--fs-label) !important; letter-spacing: var(--ls-label); text-transform: uppercase; }
+.v-application .v-data-table tbody tr:hover:not(.v-data-table__expanded__content) { background: var(--ink-2) !important; }
+.v-application .v-alert { border-radius: 0 !important; background: var(--thread-wash) !important; border: 1px solid var(--thread-edge) !important; border-left: 4px solid var(--thread) !important; color: var(--body) !important; }
+.v-application .v-snack__wrapper { background: var(--ink-2) !important; border: var(--border); border-radius: 0 !important; color: var(--bone); }
+.v-application .v-progress-linear__determinate, .v-application .v-progress-linear__indeterminate { background: var(--thread) !important; }
+.v-application .v-input--selection-controls .v-icon, .v-application .v-input--switch__thumb { color: var(--stone) !important; }
+.v-application .v-input--is-label-active .v-icon.primary--text, .v-application .v-input--switch.v-input--is-dirty .v-input--switch__thumb,
+.v-application .v-input--switch.v-input--is-dirty .v-input--switch__track { color: var(--thread) !important; caret-color: var(--thread) !important; }
+
+/* ---- conteúdo da página ---- */
+.contents { color: var(--body); font-size: var(--fs-body); line-height: var(--lh-body); }
+.contents > *:not(table):not(pre):not(.table-container):not(.tabset):not(img):not(.mermaid) { max-width: 70ch; }
+.contents > .is-info, .contents > .is-warning, .contents > .is-success, .contents > .is-danger, .contents > blockquote, .contents > ul, .contents > ol { max-width: 70ch; }
+.contents h1, .contents h2, .contents h3, .contents h4, .contents h5, .contents h6 { color: var(--bone); margin: 1.6em 0 var(--space-s); }
+.contents h1 {
+  font-family: var(--font-display); font-weight: 600; font-size: clamp(2.25rem, 4.2vw, var(--fs-heading-2));
+  line-height: var(--lh-heading-2); letter-spacing: var(--ls-heading-2); border-bottom: var(--border); padding-bottom: var(--space-s); margin-top: 1.2em;
+}
+.contents h1::after { display: none !important; }
+.contents h2 { font-family: var(--font-display); font-weight: 600; font-size: clamp(1.75rem, 3vw, 2.25rem); line-height: 1.1; }
+.contents h3 { font-family: var(--font-text); font-weight: 600; font-size: var(--fs-lead); line-height: var(--lh-heading-3); }
+.contents h4 { font-family: var(--font-text); font-weight: 600; font-size: var(--fs-heading-3); line-height: var(--lh-heading-3); }
+.contents h5, .contents h6 {
+  font-family: var(--font-mono); font-weight: 500; font-size: var(--fs-label); line-height: var(--lh-label);
+  letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--stone);
+}
+.contents .toc-anchor { color: var(--stone) !important; }
+.contents p, .contents li { color: var(--body); }
+.contents strong, .contents b { color: var(--bone); font-weight: 600; }
+.v-application .contents a:not(.v-btn), .v-application .contents blockquote a { color: var(--thread-text) !important; text-decoration: none; }
+.v-application .contents a:not(.v-btn):hover { color: var(--bone) !important; text-decoration: underline; }
+.contents a.is-external-link::after { color: var(--stone); }
+.contents a.is-internal-link.is-invalid-page { color: var(--thread-text); opacity: .7; }
+.contents hr { border: 0; border-top: var(--border); margin: var(--space-l) 0; }
+.contents img { max-width: 100%; height: auto; border: var(--border); background: var(--ink-2); }
+.v-application .contents code, .v-application .contents kbd, .v-application .contents samp { font-family: var(--font-mono); font-size: var(--fs-code); color: var(--bone) !important; background: var(--ink-0) !important; border: var(--border); border-radius: var(--radius); padding: 1px 6px; box-shadow: none; }
+.contents pre, .contents pre.prismjs { background: var(--ink-0) !important; border: var(--border); border-radius: 0; padding: var(--space-m); font-family: var(--font-mono); font-size: var(--fs-code); line-height: var(--lh-code); overflow-x: auto; box-shadow: none; }
+.contents pre code, .contents pre.prismjs code { background: transparent; border: 0; padding: 0; color: var(--body); font-size: inherit; }
+.contents .token.comment, .contents .token.prolog { color: var(--stone); }
+.contents .token.keyword, .contents .token.function, .contents .token.tag { color: var(--thread-text); }
+.contents .token.string, .contents .token.number { color: var(--bone); }
+.contents mark { background: var(--thread-wash); color: var(--thread-text); }
+/* «Notice»: o fio na borda esquerda */
+.v-application .contents blockquote {
+  background: var(--ink-2) !important; border: var(--border) !important; border-left: 4px solid var(--thread) !important; border-radius: 0 !important;
+  margin: var(--space-m) 0; padding: var(--space-m) var(--space-l) !important; color: var(--body) !important; box-shadow: none !important;
+}
+.v-application .contents blockquote.is-info, .v-application .contents blockquote.is-success { border-left-color: var(--wall) !important; }
+.v-application .contents blockquote.is-warning, .v-application .contents blockquote.is-danger { background: var(--thread-wash) !important; border-color: var(--thread-edge) !important; border-left-color: var(--thread) !important; }
+.contents blockquote::before, .contents blockquote::after { display: none !important; }
+.contents blockquote strong { color: var(--bone) !important; }
+.contents blockquote a { color: var(--thread-text); }
+.contents blockquote code { background: var(--ink-0); }
+.contents blockquote > p:last-child { margin-bottom: 0; }
+/* tabelas: cabeçalho em mono, linhas Line */
+.contents table { width: 100%; border-collapse: collapse; background: transparent; font-size: var(--fs-small); line-height: var(--lh-small); border: 0; box-shadow: none; }
+.contents table th, .contents table td { text-align: left; padding: var(--space-12); border: 0; border-bottom: var(--border); vertical-align: top; color: var(--body); background: transparent; }
+.contents table th { color: var(--stone); font-family: var(--font-mono); font-weight: 500; font-size: var(--fs-label); line-height: var(--lh-label); letter-spacing: var(--ls-label); text-transform: uppercase; background: transparent; }
+.contents table.dense th, .contents table.dense td { padding: var(--space-s) var(--space-12); }
+.contents table tbody tr:hover td { background: var(--ink-2); }
+.contents table.table-striped tbody tr:nth-child(even) td { background: transparent; }
+.contents .table-container { overflow-x: auto; max-width: 100%; }
+.contents .tabset { background: var(--ink-2); border: var(--border); }
+.contents .tabset-tabs > li { color: var(--stone); font-family: var(--font-text); }
+.contents .tabset-tabs > li[aria-selected="true"] { color: var(--bone); border-bottom-color: var(--thread); }
+.contents ul.contains-task-list .task-list-item-checkbox { accent-color: var(--thread); }
+.contents .emoji { vertical-align: text-bottom; }
+
+/* ---- comentários ---- */
+.comments-container { color: var(--body); }
+.comments-container .v-toolbar, .comments-header, .comments-container .blue-grey, .comments-container .v-sheet.blue-grey {
+  background: var(--ink-2) !important; color: var(--bone) !important; border: var(--border); border-bottom: 0;
+}
+.comments-container .v-toolbar__title { font-family: var(--font-mono); font-weight: 500; font-size: var(--fs-label); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--stone) !important; }
+.comments-container .comments-main, .comments-container .grey, .comments-container .v-sheet.grey.lighten-4, .comments-container .v-card {
+  background: var(--ink-2) !important; border: var(--border); border-radius: 0;
+}
+.comments-container .v-textarea .v-input__slot, .comments-container textarea { background: var(--ink-0) !important; border: var(--border); border-radius: var(--radius); box-shadow: none; }
+.comments-container .comments-post-btn, .comments-container .v-btn.blue-grey { background: var(--bone) !important; color: var(--ink) !important; }
+.comments-container .comments-post-btn .v-icon { color: var(--ink) !important; }
+
+/* ---- rodapé e resultados de pesquisa ---- */
+.v-application .v-footer, .v-application .v-footer.grey, .v-application .v-footer.grey.lighten-3 {
+  background: var(--ink) !important; border-top: var(--border); color: var(--stone) !important;
+  font-family: var(--font-mono); font-size: var(--fs-tag); letter-spacing: var(--ls-tag); text-transform: uppercase;
+}
+.v-footer a { color: var(--stone) !important; }
+.v-footer a:hover { color: var(--bone) !important; }
+.search-results, .search-results .v-list, .v-application .search-results-container { background: var(--ink-2) !important; }
+.search-results .v-list-item__title { color: var(--bone) !important; font-weight: 600; }
+.search-results .v-list-item__subtitle { color: var(--stone) !important; }
+.search-results .v-list-item:hover, .search-results .v-list-item--active { background: var(--ink) !important; border-left: 2px solid var(--thread); }
+.search-results .v-list-item--highlighted, .search-results .caption.grey--text { color: var(--stone) !important; }
+
+/* ---- barras de deslocamento discretas ---- */
+* { scrollbar-width: thin; scrollbar-color: var(--wall) var(--ink); }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--ink); }
+::-webkit-scrollbar-thumb { background: var(--wall); border: 2px solid var(--ink); }
+
+/* ---- telemóvel e tablet: gutter 16 / 24 / 40, sem deslizar para o lado ---- */
+html, body { overflow-x: hidden; }
+.contents { overflow-wrap: anywhere; }
+@media (max-width: 639px) {
+  .page-col-content { padding-left: var(--gutter) !important; padding-right: var(--gutter) !important; }
+  .nav-header .v-toolbar__title::before { font-size: 1.75rem; }
+  .nav-header .v-toolbar__title::after { display: none; }
+  /* As tabelas largas viram cartões; o `data-label` vem do script em body.html. */
+  .contents table, .contents table tbody, .contents table tr, .contents table td, .contents table th[scope="row"] { display: block; width: 100%; }
+  .contents table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .contents table tr { background: var(--ink-0); border: var(--border); padding: var(--space-s) var(--space-12); margin-bottom: var(--space-12); }
+  .contents table td, .contents table th[scope="row"] {
+    display: flex; justify-content: space-between; gap: var(--space-m); text-align: right; border-bottom: 0; padding: var(--space-xs) 0; overflow-wrap: anywhere;
+  }
+  .contents table td::before {
+    content: attr(data-label); flex: none; text-align: left; color: var(--stone);
+    font-family: var(--font-mono); font-weight: 500; font-size: var(--fs-tag); letter-spacing: var(--ls-tag); text-transform: uppercase;
+  }
+  .contents table td[data-label=""]::before { content: none; }
+}
+@media (min-width: 640px) { .page-col-content { padding-left: var(--space-l) !important; padding-right: var(--space-l) !important; } }
+@media (min-width: 1000px) { .page-col-content { padding-left: var(--space-xl) !important; padding-right: var(--space-xl) !important; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+/* Sem animações nem hovers animados: só mudam as cores. */
+.v-application .v-btn, .v-application .v-list-item, .v-application .v-chip { transition: none !important; }
+.v-ripple__container { display: none !important; }

@@ -1,0 +1,666 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ariadne — Small models that know where to look</title>
+<meta name="description" content="Ariadne is an offline knowledge service and a team of small language models trained to search it, cite it, and say when they don't know.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#ffffff;
+  --desk:#eef0f3;
+  --ink:#1b1e25;
+  --muted:#5a6170;
+  --rule:#d4d8df;
+  --figure:#f3f5f8;
+  --thread:#a3122a;
+  --thread-soft:#f6e4e7;
+  --serif:"STIX Two Text", "Times New Roman", serif;
+  --sans:"Instrument Sans", system-ui, sans-serif;
+  --mono:"DejaVu Sans Mono", ui-monospace, Menlo, monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--desk);color:var(--ink);font-family:var(--serif);font-size:18px;line-height:1.62;font-feature-settings:"kern","liga","onum"}
+a{color:var(--thread);text-decoration-thickness:1px;text-underline-offset:3px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--thread);outline-offset:3px;border-radius:2px}
+
+.sheet{position:relative;max-width:1000px;margin:48px auto;background:var(--paper);padding:88px 96px 72px 176px;box-shadow:0 1px 0 var(--rule),0 24px 60px -36px rgba(27,30,37,.35)}
+
+/* Ariadne's thread: one red line through the margin; every section is a bead on it */
+.thread{position:absolute;left:92px;top:96px;bottom:96px;width:2px;pointer-events:none}
+.thread svg{width:24px;height:100%;overflow:visible;margin-left:-11px}
+.thread path{fill:none;stroke:var(--thread);stroke-width:1.6;stroke-linecap:round;vector-effect:non-scaling-stroke}
+@media (prefers-reduced-motion:no-preference){
+  .thread path{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 2.6s cubic-bezier(.6,.1,.2,1) .3s forwards}
+  @keyframes draw{to{stroke-dashoffset:0}}
+}
+
+header.title{max-width:680px}
+.venue{font-family:var(--sans);font-size:14px;color:var(--muted);margin:0 0 28px}
+h1{font-weight:600;font-size:46px;line-height:1.08;letter-spacing:-.012em;margin:0 0 14px}
+.subtitle{font-size:24px;line-height:1.3;font-style:italic;color:var(--muted);margin:0 0 30px}
+.authors{font-size:17px;margin:0}
+.authors .aff{color:var(--muted)}
+.actions{display:flex;flex-wrap:wrap;gap:12px;margin:32px 0 0;font-family:var(--sans)}
+.btn{display:inline-block;font-size:15px;font-weight:500;padding:10px 18px;border-radius:999px;text-decoration:none;border:1px solid var(--ink);color:var(--ink)}
+.btn.primary{background:var(--ink);color:var(--paper)}
+.btn:hover{border-color:var(--thread);color:var(--thread)}
+.btn.primary:hover{background:var(--thread);border-color:var(--thread);color:#fff}
+
+.abstract{margin:56px 0 0;padding:28px 32px;border-left:2px solid var(--thread);background:var(--thread-soft);max-width:720px}
+.abstract h2{font-family:var(--sans);font-size:15px;font-weight:600;margin:0 0 8px;color:var(--thread)}
+.abstract p{margin:0;font-size:17.5px;text-align:justify;hyphens:auto}
+
+nav.toc{margin:44px 0 0;max-width:720px;font-size:16px;columns:2;column-gap:40px}
+nav.toc h2{font-family:var(--sans);font-size:15px;font-weight:600;margin:0 0 8px;column-span:all}
+nav.toc ol{margin:0;padding-left:1.6em}
+nav.toc li{margin-bottom:3px;break-inside:avoid}
+nav.toc a{color:var(--ink);text-decoration:none}
+nav.toc a:hover{color:var(--thread)}
+
+section{position:relative;margin-top:68px;max-width:728px}
+section h2{font-size:27px;font-weight:600;line-height:1.2;margin:0 0 18px}
+section h2 .n{position:absolute;left:-70px;width:44px;text-align:right;font-weight:500;color:var(--thread);font-feature-settings:"lnum"}
+section h2 .n::after{content:"";position:absolute;left:-19px;top:.55em;width:9px;height:9px;border-radius:50%;background:var(--paper);border:1.6px solid var(--thread)}
+h3{font-size:20px;font-weight:600;font-style:italic;margin:32px 0 8px}
+p{margin:0 0 16px}
+section p{text-align:justify;hyphens:auto}
+ul.plain,ol.plain{padding-left:1.2em;margin:0 0 16px}
+ul.plain li,ol.plain li{margin-bottom:6px}
+.claim{font-weight:500}
+code{font-family:var(--mono);font-size:.82em;background:var(--figure);padding:1px 5px;border-radius:3px}
+pre{font-family:var(--mono);font-size:13px;line-height:1.5;background:var(--figure);border:1px solid var(--rule);border-radius:6px;padding:16px 18px;overflow-x:auto;margin:0}
+pre .c{color:var(--muted)}
+pre .k{color:var(--thread)}
+
+figure{margin:36px 0;padding:0}
+figure .plate{background:var(--figure);border:1px solid var(--rule);border-radius:6px;padding:22px}
+figure svg{display:block;width:100%;height:auto}
+figcaption{font-size:15.5px;line-height:1.5;color:var(--muted);margin-top:12px}
+figcaption b{color:var(--ink);font-weight:600}
+.fl{font-family:var(--sans);font-size:12.5px;fill:var(--ink)}
+.fb{font-family:var(--sans);font-size:12.5px;font-weight:600;fill:var(--ink)}
+.fs{font-family:var(--sans);font-size:10.5px;fill:var(--muted)}
+.fr{font-family:var(--sans);font-size:10.5px;fill:var(--thread)}
+.fg{font-family:var(--sans);font-size:11px;font-weight:600;fill:var(--muted)}
+.box{fill:#fff;stroke:#9aa1ad;stroke-width:1}
+.hot{fill:#fff;stroke:var(--thread);stroke-width:1.4}
+.grp{fill:none;stroke:#b8bec8;stroke-width:1;stroke-dasharray:4 3}
+.ln{stroke:#7d8592;stroke-width:1;fill:none}
+.rd{stroke:var(--thread);stroke-width:1.4;fill:none}
+.dash{stroke-dasharray:3 3}
+.bar{fill:var(--ink)}
+.bar.off{fill:#c3c8d0}
+
+table{width:100%;border-collapse:collapse;font-size:16px;margin:8px 0 0}
+caption{caption-side:top;text-align:left;font-size:15.5px;color:var(--muted);padding-bottom:10px}
+caption b{color:var(--ink)}
+th,td{text-align:left;vertical-align:top;padding:10px 12px 10px 0;border-bottom:1px solid var(--rule)}
+thead th{font-family:var(--sans);font-size:14px;font-weight:600;border-bottom:1.5px solid var(--ink)}
+tbody tr:last-child td{border-bottom:1.5px solid var(--ink)}
+td.num{font-feature-settings:"lnum","tnum";white-space:nowrap}
+.status{font-family:var(--sans);font-size:13px;font-weight:500;white-space:nowrap;padding:2px 10px;border-radius:999px;border:1px solid var(--rule)}
+.status.now{border-color:var(--thread);color:var(--thread)}
+.tablewrap{overflow-x:auto;margin:28px 0}
+
+.eq{font-style:italic;text-align:center;margin:22px 0;font-size:19px}
+.eq .tag{float:right;font-style:normal;color:var(--muted)}
+
+.note{border-left:2px solid var(--rule);padding:4px 0 4px 18px;color:var(--muted);font-size:16.5px;margin:22px 0}
+
+ol.refs{font-size:15.5px;line-height:1.5;padding-left:2.2em;margin:0}
+ol.refs li{margin-bottom:8px}
+ol.refs li::marker{color:var(--muted)}
+
+footer{margin-top:72px;padding-top:20px;border-top:1px solid var(--rule);font-family:var(--sans);font-size:14px;color:var(--muted);display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;max-width:728px}
+footer a{color:var(--muted)}
+
+@media (max-width:900px){
+  .sheet{margin:0;padding:56px 20px 48px;box-shadow:none}
+  .thread{display:none}
+  section h2 .n{position:static;display:inline;margin-right:.4em;width:auto}
+  section h2 .n::after{display:none}
+  h1{font-size:36px}
+  .subtitle{font-size:20px}
+  .abstract{padding:22px 20px}
+  nav.toc{columns:1}
+  section p,.abstract p{text-align:left;hyphens:manual}
+  figure .plate{padding:10px;overflow-x:auto}
+  figure svg{min-width:560px}
+  table{font-size:15px}
+}
+@media print{body{background:#fff}.sheet{box-shadow:none;margin:0}.actions{display:none}}
+</style>
+</head>
+<body>
+<main class="sheet">
+  <div class="thread" aria-hidden="true"><svg viewBox="0 0 24 1000" preserveAspectRatio="none"><path pathLength="1" d="M12 0 V 1000"/></svg></div>
+
+  <header class="title">
+    <p class="venue">Working draft, October 2026. Open-source project.</p>
+    <h1>Ariadne</h1>
+    <p class="subtitle">Small language models that know where to look, instead of trying to know everything.</p>
+    <p class="authors">The Ariadne project</p>
+    <div class="actions">
+      <a class="btn primary" href="https://github.com/VivaldiCode/Ariadne">View the repository</a>
+      <a class="btn" href="https://github.com/VivaldiCode/Ariadne/blob/main/ARCHITECTURE.md">Read the architecture</a>
+    </div>
+  </header>
+
+  <div class="abstract">
+    <h2>Abstract</h2>
+    <p>Language models freeze what they learn at training time, so their knowledge goes stale and they cannot tell when it has. Ariadne takes the opposite approach. It is an offline knowledge service, built from curated open libraries and served to any model through the Model Context Protocol, plus a team of small models trained to search that service, cite what they find and say when they find nothing. A router sends each question to a few domain specialists in parallel, an aggregator keeps only the claims it can verify, and a control plane shares one modest machine fairly between administrators and users. Knowledge lives outside the weights, where it can be updated, audited and owned. The same structure extends to private knowledge: a company connects its own documentation and gets a small model of its own that already knows how to look things up, without retraining it on every change.</p>
+  </div>
+
+  <nav class="toc" aria-label="Contents">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#introduction">The problem with knowing everything</a></li>
+      <li><a href="#overview">System overview</a></li>
+      <li><a href="#service">A knowledge service in three levels</a></li>
+      <li><a href="#curation">From raw archives to a curated corpus</a></li>
+      <li><a href="#graph">Indexing by use, linking by default</a></li>
+      <li><a href="#lifecycle">The life of a question</a></li>
+      <li><a href="#routing">Routing the team of small models</a></li>
+      <li><a href="#specialists">Specialists, code and the aggregator</a></li>
+      <li><a href="#people">Administrators, users and sessions</a></li>
+      <li><a href="#health">Keeping the machine healthy</a></li>
+      <li><a href="#training">Training, evaluation and lineage</a></li>
+      <li><a href="#safety">Safety by construction</a></li>
+      <li><a href="#yours">A model of your own</a></li>
+      <li><a href="#principles">Design principles</a></li>
+      <li><a href="#roadmap">Status and roadmap</a></li>
+      <li><a href="#evaluation">The hypothesis to test first</a></li>
+    </ol>
+  </nav>
+
+  <!-- 1 -->
+  <section id="introduction">
+    <h2><span class="n">1</span>The problem with knowing everything</h2>
+    <p>Today's assistants answer from memory. Their facts are fixed at a training cutoff, compressed into billions of parameters, and impossible to inspect. When a library changes its API or a guideline is revised, the model keeps answering confidently from an old copy. Making models larger postpones the problem; it does not remove it.</p>
+    <p class="claim">Ariadne starts from a different premise: a model does not need to contain the library, it needs to know how to walk through it.</p>
+    <p>In the myth, Ariadne gives Theseus a thread so he can find his way through the labyrinth without memorising it. The project applies the same idea to language models: the knowledge is the labyrinth, kept outside the model, and the model learns to follow the thread to a cited answer.</p>
+  </section>
+
+  <!-- 2 -->
+  <section id="overview">
+    <h2><span class="n">2</span>System overview</h2>
+    <p>Ariadne is split along one clear line. A <i>control plane</i> runs on a server with plenty of storage and memory, and holds everything that has state: the knowledge, the sessions, the decisions about which model runs where. <i>Inference nodes</i> are machines with a capable GPU that only serve models over HTTP. They do not know about each other; adding one means registering its address.</p>
+
+    <figure>
+      <div class="plate">
+        <svg viewBox="0 0 660 400" role="img" aria-labelledby="f-ov">
+          <title id="f-ov">System overview: people and harnesses talk to the control plane, which holds the knowledge service and decides which models run on the inference nodes. Cloud GPUs are optional and only for training.</title>
+          <text class="fg" x="10" y="14">People and agents</text>
+          <rect class="hot" x="10" y="30" width="122" height="38" rx="6"/><text class="fb" x="71" y="48" text-anchor="middle">Administrator</text><text class="fs" x="71" y="61" text-anchor="middle">never refused</text>
+          <rect class="box" x="10" y="80" width="122" height="38" rx="6"/><text class="fb" x="71" y="98" text-anchor="middle">Users</text><text class="fs" x="71" y="111" text-anchor="middle">about three at once</text>
+          <rect class="box" x="10" y="130" width="122" height="38" rx="6"/><text class="fb" x="71" y="148" text-anchor="middle">trainer</text><text class="fs" x="71" y="161" text-anchor="middle">public training data</text>
+          <rect class="box" x="10" y="180" width="122" height="38" rx="6"/><text class="fb" x="71" y="198" text-anchor="middle">Harness</text><text class="fs" x="71" y="211" text-anchor="middle">Hermes or Claude</text>
+          <path class="ln" d="M132 49 H162 M132 99 H162 M132 149 H162 M132 199 H162 M162 49 V199 M162 124 H182"/>
+
+          <text class="fg" x="182" y="14">Control plane · hipervisor or NAS</text>
+          <rect class="grp" x="176" y="22" width="262" height="340" rx="8"/>
+          <rect class="box" x="186" y="32" width="242" height="34" rx="6"/><text class="fl" x="307" y="53" text-anchor="middle">Gateway, identity and sessions</text>
+          <rect class="box" x="186" y="76" width="116" height="40" rx="6"/><text class="fl" x="244" y="93" text-anchor="middle">Translation</text><text class="fs" x="244" y="107" text-anchor="middle">LibreTranslate</text>
+          <rect class="box" x="312" y="76" width="116" height="40" rx="6"/><text class="fl" x="370" y="93" text-anchor="middle">Router</text><text class="fs" x="370" y="107" text-anchor="middle">open-jev, typed</text>
+          <rect class="box" x="186" y="126" width="242" height="40" rx="6"/><text class="fl" x="307" y="143" text-anchor="middle">Model manager</text><text class="fs" x="307" y="157" text-anchor="middle">memory budget, priorities, queue</text>
+          <rect class="hot" x="186" y="176" width="242" height="40" rx="6"/><text class="fb" x="307" y="193" text-anchor="middle">Ariadne knowledge service</text><text class="fs" x="307" y="207" text-anchor="middle">one MCP server for every model</text>
+          <rect class="box" x="186" y="226" width="116" height="40" rx="6"/><text class="fl" x="244" y="243" text-anchor="middle">Postgres</text><text class="fs" x="244" y="257" text-anchor="middle">pgvector, logs</text>
+          <rect class="box" x="312" y="226" width="116" height="40" rx="6"/><text class="fl" x="370" y="243" text-anchor="middle">Wiki.js</text><text class="fs" x="370" y="257" text-anchor="middle">curated corpus</text>
+          <rect class="box" x="186" y="276" width="116" height="40" rx="6"/><text class="fl" x="244" y="293" text-anchor="middle">Code sandbox</text><text class="fs" x="244" y="307" text-anchor="middle">no network</text>
+          <rect class="box" x="312" y="276" width="116" height="40" rx="6"/><text class="fl" x="370" y="293" text-anchor="middle">Dashboard</text><text class="fs" x="370" y="307" text-anchor="middle">everything visible</text>
+          <rect class="box" x="186" y="326" width="242" height="28" rx="6"/><text class="fs" x="307" y="344" text-anchor="middle">ZIM archives on disk, read only</text>
+
+          <text class="fg" x="488" y="14">Inference nodes · Mac Studio</text>
+          <rect class="grp" x="482" y="22" width="168" height="250" rx="8"/>
+          <rect class="hot" x="492" y="32" width="148" height="40" rx="6"/><text class="fl" x="566" y="49" text-anchor="middle">Node agent + watchdog</text><text class="fr" x="566" y="63" text-anchor="middle">local protection</text>
+          <rect class="box" x="492" y="82" width="148" height="40" rx="6"/><text class="fl" x="566" y="99" text-anchor="middle">Specialists</text><text class="fs" x="566" y="113" text-anchor="middle">SmolLM2-360M + adapters</text>
+          <rect class="box" x="492" y="132" width="148" height="40" rx="6"/><text class="fl" x="566" y="149" text-anchor="middle">Code generation</text><text class="fs" x="566" y="163" text-anchor="middle">StarCoder2-3B + adapters</text>
+          <rect class="box" x="492" y="182" width="148" height="40" rx="6"/><text class="fl" x="566" y="199" text-anchor="middle">Aggregator</text><text class="fs" x="566" y="213" text-anchor="middle">SmolLM2-1.7B</text>
+          <rect class="box" x="492" y="228" width="148" height="34" rx="6"/><text class="fl" x="566" y="244" text-anchor="middle">Curator, in batches</text><text class="fs" x="566" y="256" text-anchor="middle">Gemma 3 12B, when idle</text>
+
+          <path class="ln" d="M428 146 H482"/><text class="fs" x="455" y="140" text-anchor="middle">load</text>
+          <path class="ln" d="M428 96 H460 V106 H482"/><text class="fs" x="455" y="90" text-anchor="middle">infer</text>
+          <path class="rd" d="M482 196 H460 V196 H428"/><text class="fr" x="455" y="190" text-anchor="middle">search</text>
+
+          <rect class="grp" x="482" y="300" width="168" height="62" rx="8"/>
+          <text class="fl" x="566" y="324" text-anchor="middle">Cloud GPUs</text><text class="fs" x="566" y="339" text-anchor="middle">Kaggle, Colab, RunPod, Vast.ai</text><text class="fs" x="566" y="352" text-anchor="middle">off by default, training only</text>
+          <path class="ln dash" d="M566 272 V300"/>
+          <text class="fs" x="330" y="390" text-anchor="middle">If a node goes offline, the control plane keeps answering in degraded mode: search results without generation.</text>
+        </svg>
+      </div>
+      <figcaption><b>Figure 1.</b> The control plane decides; the nodes compute. Models keep no state of their own, so any conversation can continue on any node, and the watchdog on each node protects it even if the network to the control plane fails.</figcaption>
+    </figure>
+
+    <p>Inside the models everything is in English. Questions are translated on the way in and answers on the way out by a local LibreTranslate service, which is far cheaper than asking a language model to work in every language. Code, citations and identifiers are masked before translation and restored afterwards.</p>
+  </section>
+
+  <!-- 3 -->
+  <section id="service">
+    <h2><span class="n">3</span>A knowledge service in three levels</h2>
+    <p>The first part of Ariadne is useful on its own, for any model, including large hosted ones. It turns a library of offline archives into a linked, searchable corpus and serves it through a single MCP server with a handful of tools: <code>search</code>, <code>read</code>, <code>neighbors</code>, <code>translations</code>, <code>feedback</code> and <code>sources</code>.</p>
+
+    <figure>
+      <div class="plate">
+        <svg viewBox="0 0 640 250" role="img" aria-labelledby="f-lv">
+          <title id="f-lv">Three levels of the knowledge service, from raw archives to semantic vectors, all behind one MCP server.</title>
+          <rect class="hot" x="230" y="10" width="180" height="40" rx="6"/>
+          <text class="fb" x="320" y="35" text-anchor="middle">MCP server</text>
+          <path class="ln" d="M320 50 V70 M90 70 H550 M90 70 V100 M320 70 V100 M550 70 V100"/>
+          <rect class="box" x="10" y="100" width="160" height="78" rx="6"/>
+          <text class="fb" x="90" y="126" text-anchor="middle">Level 1 · Archive</text>
+          <text class="fs" x="90" y="146" text-anchor="middle">Kiwix ZIM files</text>
+          <text class="fs" x="90" y="162" text-anchor="middle">raw source material only</text>
+          <rect class="box" x="240" y="100" width="160" height="78" rx="6"/>
+          <text class="fb" x="320" y="126" text-anchor="middle">Level 2 · Curated wiki</text>
+          <text class="fs" x="320" y="146" text-anchor="middle">cleaned, rewritten, linked</text>
+          <text class="fs" x="320" y="162" text-anchor="middle">across sources and languages</text>
+          <rect class="hot" x="470" y="100" width="160" height="78" rx="6"/>
+          <text class="fb" x="550" y="126" text-anchor="middle">Level 3 · Semantic</text>
+          <text class="fs" x="550" y="146" text-anchor="middle">vectors for what is used</text>
+          <text class="fs" x="550" y="162" text-anchor="middle">and its neighbours</text>
+          <path class="rd" d="M170 139 H240 M400 139 H470"/>
+          <text class="fs" x="205" y="132" text-anchor="middle">curate</text>
+          <text class="fs" x="435" y="132" text-anchor="middle">embed</text>
+          <path class="ln dash" d="M550 178 V215 H320 V178"/>
+          <text class="fs" x="320" y="236" text-anchor="middle">if the semantic level is unsure, the query falls back to full-text search in the wiki</text>
+        </svg>
+      </div>
+      <figcaption><b>Figure 2.</b> The three levels. Everything that is searched or used for training lives in the curated wiki, which records the archive, version and path every page came from. Citations point to an exact wiki revision, so old answers stay verifiable after updates.</figcaption>
+    </figure>
+
+    <p>The archives come from the Kiwix catalogue: Wikipedia, dozens of Stack Exchange sites, official programming documentation, medical references, survival and repair manuals. In the first phase they are downloaded by hand, in batches by size, and Ariadne simply watches a folder; later the dashboard can fetch them from the catalogue directly.</p>
+  </section>
+
+  <!-- 4 -->
+  <section id="curation">
+    <h2><span class="n">4</span>From raw archives to a curated corpus</h2>
+    <p>Raw web content is not safe to train on or to hand to a model as-is. It can hide instructions aimed at language models, carry encoded payloads, or include commands that would be dangerous if copied. Ariadne treats the archives as raw material and cleans everything at the entrance, so nothing downstream has to defend itself.</p>
+
+    <figure>
+      <div class="plate">
+        <svg viewBox="0 0 640 220" role="img" aria-labelledby="f-cu">
+          <title id="f-cu">Curation pipeline: deterministic conversion for most articles, a curator model only for flagged, health or sampled articles, then a fidelity check before publishing, with a human review queue for doubtful cases.</title>
+          <rect class="box" x="6" y="70" width="96" height="44" rx="6"/><text class="fl" x="54" y="89" text-anchor="middle">ZIM article</text><text class="fs" x="54" y="103" text-anchor="middle">extract</text>
+          <rect class="box" x="122" y="70" width="110" height="44" rx="6"/><text class="fl" x="177" y="89" text-anchor="middle">HTML → Markdown</text><text class="fs" x="177" y="103" text-anchor="middle">deterministic</text>
+          <polygon class="hot" points="300,62 348,92 300,122 252,92"/><text class="fl" x="300" y="89" text-anchor="middle">flags?</text><text class="fs" x="300" y="102" text-anchor="middle">triage</text>
+          <rect class="hot" x="370" y="10" width="118" height="44" rx="6"/><text class="fl" x="429" y="29" text-anchor="middle">Curator model</text><text class="fs" x="429" y="43" text-anchor="middle">clean and rewrite</text>
+          <rect class="box" x="370" y="70" width="118" height="44" rx="6"/><text class="fl" x="429" y="89" text-anchor="middle">Fidelity check</text><text class="fs" x="429" y="103" text-anchor="middle">same facts, same numbers</text>
+          <rect class="box" x="510" y="70" width="124" height="44" rx="6"/><text class="fb" x="572" y="89" text-anchor="middle">Wiki.js</text><text class="fs" x="572" y="103" text-anchor="middle">with provenance</text>
+          <rect class="box" x="370" y="166" width="118" height="44" rx="6"/><text class="fl" x="429" y="185" text-anchor="middle">Human review</text><text class="fs" x="429" y="199" text-anchor="middle">doubtful cases</text>
+          <path class="ln" d="M102 92 H122 M232 92 H252"/>
+          <path class="rd" d="M300 62 V32 H370"/><text class="fr" x="294" y="26" text-anchor="end">flagged, health</text><text class="fr" x="294" y="39" text-anchor="end">or random sample</text>
+          <path class="ln" d="M429 54 V70"/>
+          <path class="ln" d="M300 122 V142 H572 V114"/><text class="fs" x="306" y="156">clean: publish directly</text>
+          <path class="ln" d="M488 92 H510"/>
+          <path class="ln dash" d="M429 114 V166"/><text class="fs" x="436" y="132">fails</text>
+        </svg>
+      </div>
+      <figcaption><b>Figure 3.</b> A hybrid pipeline. Most articles only need a deterministic conversion. The larger curator model sees just the fraction that trips a flag, every health article, and a small random sample used to tune the flags themselves.</figcaption>
+    </figure>
+
+    <ul class="plain">
+      <li><b>Flags</b> catch injection patterns ("ignore previous instructions", system-style tags, hidden text), long encoded blocks, dangerous commands such as piping a download into a shell, and clinical doses.</li>
+      <li><b>The fidelity check</b> compares the facts of the original and the rewrite. If the curator changed a number or a claim, the article does not pass.</li>
+      <li><b>Updates are incremental.</b> When a new archive version arrives, each article is compared by fingerprint; only changed articles are curated again, and removed ones are archived, never deleted.</li>
+      <li><b>Attribution travels with the text.</b> Rewritten Wikipedia and Stack Exchange content keeps its original licence and credit.</li>
+    </ul>
+    <p>Rewriting an entire encyclopedia this way would take years on one machine, so curation follows use: what people actually consult is curated first, and very large batches can be sent to rented GPUs.</p>
+  </section>
+
+  <!-- 5 -->
+  <section id="graph">
+    <h2><span class="n">5</span>Indexing by use, linking by default</h2>
+    <p>Vectorising every article on modest hardware is impractical, so Ariadne does not try. The semantic level behaves like a cache that warms with use: whatever is consulted gets embedded, and documents that are consulted often pull their neighbours in after them.</p>
+    <p class="eq">heat(<i>t</i>) = heat(<i>t</i><sub>0</sub>) · 2<sup>−(<i>t</i> − <i>t</i><sub>0</sub>) / <i>h</i></sup> + <i>w</i><span class="tag">(1)</span></p>
+    <p>Each access adds a weight <i>w</i> (more when a result is actually used in an answer than when it is merely shown), and the score decays with a half-life <i>h</i>. When a document crosses a threshold, its neighbours are queued within a daily budget: adjacent sections, internal links, articles in the same topic and the nearest neighbours in vector space, one hop at a time.</p>
+    <p>The guiding rule is that no content stays isolated. Articles are linked across archives, so a history answer can point to a primary source in Wikisource, and across languages, so an event can be read in the language where it happened; for historical questions the original-language source is offered alongside the translation. Every link records its origin and confidence, and can be reviewed.</p>
+  </section>
+
+  <!-- 6 -->
+  <section id="lifecycle">
+    <h2><span class="n">6</span>The life of a question</h2>
+    <p>Speed is not the goal; consistency is. A question may take seconds or minutes, as long as every statement in the answer can be traced to a source. Figure 4 follows one question through the whole system.</p>
+
+    <figure>
+      <div class="plate">
+        <svg viewBox="0 0 640 560" role="img" aria-labelledby="f-lc">
+          <title id="f-lc">The life of a question: translation, routing, parallel specialists that search Ariadne, aggregation with verification, translation back and logging.</title>
+          <rect class="box" x="200" y="8" width="240" height="38" rx="6"/><text class="fb" x="320" y="25" text-anchor="middle">Question in Portuguese</text><text class="fs" x="320" y="39" text-anchor="middle">with the session's recent history</text>
+          <path class="ln" d="M320 46 V60"/>
+          <rect class="box" x="200" y="60" width="240" height="34" rx="6"/><text class="fl" x="320" y="81" text-anchor="middle">LibreTranslate: Portuguese → English</text>
+          <path class="ln" d="M320 94 V108"/>
+          <rect class="hot" x="200" y="108" width="240" height="52" rx="6"/><text class="fb" x="320" y="127" text-anchor="middle">Router</text><text class="fs" x="320" y="141" text-anchor="middle">one call, several typed answers:</text><text class="fs" x="320" y="153" text-anchor="middle">domain scores, needs code, language, health</text>
+          <text class="fs" x="24" y="124">The adapter for the detected</text><text class="fs" x="24" y="137">language starts loading now,</text><text class="fs" x="24" y="150">so it is warm when needed.</text>
+          <path class="ln" d="M320 160 V178 H100 V196 M320 178 V196 M320 178 H540 V196"/>
+          <text class="fr" x="330" y="190">fan-out in parallel</text>
+          <rect class="box" x="30" y="196" width="140" height="48" rx="6"/><text class="fb" x="100" y="215" text-anchor="middle">Programming</text><text class="fs" x="100" y="230" text-anchor="middle">code adapter</text>
+          <rect class="box" x="250" y="196" width="140" height="48" rx="6"/><text class="fb" x="320" y="215" text-anchor="middle">Practical</text><text class="fs" x="320" y="230" text-anchor="middle">electronics, sensors</text>
+          <rect class="hot" x="470" y="196" width="140" height="48" rx="6"/><text class="fb" x="540" y="215" text-anchor="middle">Health</text><text class="fr" x="540" y="230" text-anchor="middle">strict rules</text>
+          <path class="rd" d="M100 244 V268 M320 244 V268 M540 244 V268"/>
+          <path class="rd" d="M92 268 V244 M312 268 V244 M532 268 V244" opacity=".35"/>
+          <text class="fr" x="108" y="260">search, read</text>
+          <rect class="hot" x="10" y="268" width="620" height="30" rx="6"/><text class="fb" x="320" y="288" text-anchor="middle">Ariadne knowledge service (MCP)</text>
+          <path class="ln" d="M100 298 V318 H540 V298 M320 298 V318 M320 318 V334"/>
+          <text class="fs" x="330" y="330">claims with citations, or a refusal</text>
+          <rect class="grp" x="20" y="334" width="600" height="92" rx="8"/>
+          <text class="fb" x="34" y="352">Aggregator</text>
+          <rect class="box" x="34" y="362" width="134" height="52" rx="6"/><text class="fl" x="101" y="381" text-anchor="middle">1 Verify</text><text class="fs" x="101" y="395" text-anchor="middle">passage exists and</text><text class="fs" x="101" y="406" text-anchor="middle">supports the claim</text>
+          <rect class="box" x="180" y="362" width="134" height="52" rx="6"/><text class="fl" x="247" y="381" text-anchor="middle">2 Group</text><text class="fs" x="247" y="395" text-anchor="middle">agreeing claims</text><text class="fs" x="247" y="406" text-anchor="middle">gain weight</text>
+          <rect class="box" x="326" y="362" width="134" height="52" rx="6"/><text class="fl" x="393" y="381" text-anchor="middle">3 Resolve</text><text class="fs" x="393" y="395" text-anchor="middle">prefer specific source</text><text class="fs" x="393" y="406" text-anchor="middle">or show both sides</text>
+          <rect class="box" x="472" y="362" width="134" height="52" rx="6"/><text class="fl" x="539" y="381" text-anchor="middle">4 Write</text><text class="fs" x="539" y="395" text-anchor="middle">only what survived;</text><text class="fs" x="539" y="406" text-anchor="middle">run code in sandbox</text>
+          <path class="ln" d="M168 388 H180 M314 388 H326 M460 388 H472"/>
+          <path class="ln" d="M320 426 V440"/>
+          <rect class="box" x="200" y="440" width="240" height="34" rx="6"/><text class="fl" x="320" y="461" text-anchor="middle">LibreTranslate: English → Portuguese</text>
+          <path class="ln" d="M320 474 V488"/>
+          <rect class="box" x="200" y="488" width="240" height="38" rx="6"/><text class="fb" x="320" y="505" text-anchor="middle">Answer with sources</text><text class="fs" x="320" y="519" text-anchor="middle">plus a note if it is about health</text>
+          <path class="ln dash" d="M440 507 H636 V134 H440"/>
+          <text class="fs" x="452" y="500">logged for training</text>
+          <text class="fs" x="320" y="550" text-anchor="middle">If nothing survives verification, the answer says no reliable source was found.</text>
+        </svg>
+      </div>
+      <figcaption><b>Figure 4.</b> One question end to end. The example asks how to build a heart-rate monitor that warns about abnormal values, which touches three domains at once (Table 1). The logged trajectory later feeds routing and specialist training.</figcaption>
+    </figure>
+  </section>
+
+  <!-- 7 -->
+  <section id="routing">
+    <h2><span class="n">7</span>Routing the team of small models</h2>
+    <p>The router does not generate text. It is based on open-jev, an open reconstruction of a typed decision model, trained from scratch on Ariadne's own data. In a single call it answers several typed questions about each message, each with a calibrated probability, so a score of 0.30 means roughly a 30% chance that the domain is relevant.</p>
+
+    <figure>
+      <div class="plate">
+        <svg viewBox="0 0 640 260" role="img" aria-labelledby="f-rt">
+          <title id="f-rt">Router scores for the heart-rate monitor question. Programming 0.85, Practical 0.60 and Health 0.45 pass the 0.30 threshold; the others do not.</title>
+          <text class="fs" x="10" y="16">Question: “How do I build a heart-rate monitor that alerts on abnormal values?”</text>
+          <g class="fl">
+            <text x="10" y="50">Programming</text><text x="10" y="78">Practical and survival</text><text x="10" y="106">Health</text><text x="10" y="134">Sciences</text><text x="10" y="162">General</text><text x="10" y="190">History</text><text x="10" y="218">Languages</text>
+          </g>
+          <rect class="bar" x="160" y="38" width="263" height="16" rx="2"/><text class="fl" x="430" y="50">0.85</text>
+          <rect class="bar" x="160" y="66" width="186" height="16" rx="2"/><text class="fl" x="353" y="78">0.60</text>
+          <rect class="bar" x="160" y="94" width="140" height="16" rx="2"/><text class="fl" x="307" y="106">0.45</text>
+          <rect class="bar off" x="160" y="122" width="68" height="16" rx="2"/><text class="fs" x="235" y="134">0.22</text>
+          <rect class="bar off" x="160" y="150" width="47" height="16" rx="2"/><text class="fs" x="214" y="162">0.15</text>
+          <rect class="bar off" x="160" y="178" width="16" height="16" rx="2"/><text class="fs" x="183" y="190">0.05</text>
+          <rect class="bar off" x="160" y="206" width="6" height="16" rx="2"/><text class="fs" x="173" y="218">0.02</text>
+          <path class="rd dash" d="M253 30 V230"/><text class="fr" x="253" y="246" text-anchor="middle">call at 0.30</text>
+          <path class="ln dash" d="M315 30 V230"/><text class="fs" x="318" y="246">below 0.50 at the top, add General</text>
+          <rect class="box" x="486" y="38" width="146" height="110" rx="6"/>
+          <text class="fb" x="498" y="58">Typed answers</text>
+          <text class="fs" x="498" y="78">needs code: yes</text>
+          <text class="fs" x="498" y="96">language: Python</text>
+          <text class="fr" x="498" y="114">health: yes</text>
+          <text class="fs" x="498" y="132">specialists called: 3 of 3</text>
+        </svg>
+      </div>
+      <figcaption><b>Figure 5.</b> Calibrated scores turn routing into a policy instead of a single guess. Three domains pass the threshold, so three specialists work in parallel; the health flag switches on the stricter rules for health claims only.</figcaption>
+    </figure>
+
+    <h3>Routing policy</h3>
+    <ol class="plain">
+      <li>Call every domain that scores 0.30 or more.</li>
+      <li>Always call at least the top-scoring domain.</li>
+      <li>If the top score is below 0.50, the router is unsure, so add the general specialist as well.</li>
+      <li>Call at most three specialists per question to protect shared resources; administrators may have a higher cap.</li>
+      <li>Read the session's recent history, so a conversation that moves from planting crops to an irrigation script calls both domains.</li>
+    </ol>
+    <p>These values are starting points, tuned on a validation set. Routing errors are absorbed twice: when unsure the router calls more specialists, and each specialist is trained to refuse questions outside its domain, so a wrong call ends in a clean refusal instead of a contaminated answer.</p>
+
+    <div class="tablewrap">
+      <table>
+        <caption><b>Table 1.</b> Initial domains and their main sources. The first specialists are programming, health and history; the rest are served by the general specialist until there is enough data.</caption>
+        <thead><tr><th>Domain</th><th>Main sources</th></tr></thead>
+        <tbody>
+          <tr><td>Programming and systems</td><td>Stack Overflow and technical Stack Exchange sites, DevDocs, Python and other official docs, Linux distribution wikis, freeCodeCamp</td></tr>
+          <tr><td>Sciences and mathematics</td><td>Science Stack Exchange sites, ProofWiki, PlanetMath, LibreTexts, PhET, Wikispecies</td></tr>
+          <tr><td>Health</td><td>MDWiki, WikEM, MedlinePlus, NHS, CDC, LibrePathology, WikiVet</td></tr>
+          <tr><td>Practical and survival</td><td>Appropedia, Energypedia, CD3WD, Ready.gov, iFixit, gardening, cooking, repair and DIY sites</td></tr>
+          <tr><td>History and humanities</td><td>History Stack Exchange, Wikisource, Wikiquote, Project Gutenberg, philosophy encyclopedia</td></tr>
+          <tr><td>Languages</td><td>Wiktionary in six languages, language-learning Stack Exchange sites, linguistics</td></tr>
+          <tr><td>General (fallback)</td><td>Wikipedia, Wikibooks, Wikiversity, Vikidia</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Training labels come almost for free: every question on a Stack Exchange site is a real question already tagged with its domain, which gives hundreds of thousands of examples for the router, and accepted answers seed the specialists' training.</p>
+  </section>
+
+  <!-- 8 -->
+  <section id="specialists">
+    <h2><span class="n">8</span>Specialists, code and the aggregator</h2>
+    <p>All specialists share one small base model kept in memory, with a lightweight LoRA adapter per domain. An adapter weighs a few dozen megabytes and swaps in under a second, so a single machine can host a whole team. Each specialist sits behind its own OpenAI-compatible HTTP endpoint, and all of them search the same Ariadne service: knowledge lives in one place, and machines only add reasoning capacity.</p>
+
+    <h3>Code generation</h3>
+    <p>A model with a few hundred million parameters writes weak code, so code generation has its own base model, StarCoder2-3B, with one adapter per language: Python, JavaScript for Node, JavaScript for the browser, and Go, with more to follow. The base stays resident; switching from Python to JavaScript means swapping an adapter, and the router starts loading it as soon as it detects the language. Generated code always runs in a disposable sandbox before it reaches the answer. Compiling and passing tests is both the check and the reward signal for training.</p>
+
+    <h3>One contract between all parts</h3>
+    <p>Every specialist answers in the same structure. Citations are attached to individual claims rather than to the whole answer, so the aggregator can drop one unsupported sentence without discarding everything else.</p>
+<pre><span class="c">// specialist → aggregator</span>
+{
+  <span class="k">"status"</span>: "answered | refused | partial | error",
+  <span class="k">"refusal_reason"</span>: null,
+  <span class="k">"answer_en"</span>: "…",
+  <span class="k">"claims"</span>: [{
+    "text": "Resting heart rate in adults is usually 60–100 bpm.",
+    "citations": [{ "doc_id": "wiki/health/heart-rate", "revision": "r1842", "quote": "…" }]
+  }],
+  <span class="k">"confidence"</span>: 0.78,
+  <span class="k">"trajectory"</span>: ["search …", "read …"],
+  <span class="k">"model"</span>: { "base": "SmolLM2-360M", "adapter": "health", "adapter_version": "v3" },
+  <span class="k">"latency_ms"</span>: 4200
+}</pre>
+    <p style="margin-top:16px">A <code>partial</code> status lets a specialist say what it knows and admit what it does not, which is always better than inventing. Each request carries a deadline; the aggregator proceeds without any specialist that misses it.</p>
+
+    <h3>The aggregator</h3>
+    <p>The aggregator is a larger model from the same family, SmolLM2-1.7B, sharing the tokenizer and training pipeline of the specialists. It verifies every cited passage exactly, then checks that the passage supports the claim; groups claims that agree; resolves contradictions by preferring the source most specific to the domain, or shows both positions with their sources; and writes the final answer only from what survived. If nothing survives, it says so.</p>
+
+    <div class="tablewrap">
+      <table>
+        <caption><b>Table 2.</b> Models planned for the first experiments. All are used at their native size and precision, stored with their original licence, and listed in an approved-model registry with their origin.</caption>
+        <thead><tr><th>Role</th><th>Model</th><th>Parameters</th><th>Licence</th></tr></thead>
+        <tbody>
+          <tr><td>Router</td><td>open-jev, trained from scratch</td><td class="num">small</td><td>to be confirmed</td></tr>
+          <tr><td>Specialists</td><td>SmolLM2 + one adapter per domain</td><td class="num">360 M</td><td>Apache 2.0</td></tr>
+          <tr><td>Code generation</td><td>StarCoder2 + one adapter per language</td><td class="num">3 B</td><td>BigCode OpenRAIL-M</td></tr>
+          <tr><td>Aggregator</td><td>SmolLM2</td><td class="num">1.7 B</td><td>Apache 2.0</td></tr>
+          <tr><td>Curator</td><td>Gemma 3</td><td class="num">12 B</td><td>Gemma terms</td></tr>
+          <tr><td>Embeddings</td><td>multilingual-e5-small</td><td class="num">118 M</td><td>MIT</td></tr>
+          <tr><td>Translation</td><td>LibreTranslate (Argos models)</td><td class="num">small</td><td>AGPL / MIT</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section id="people">
+    <h2><span class="n">9</span>Administrators, users and sessions</h2>
+    <p>One machine is shared by an administrator and a few users at once, each possibly switching subjects in the middle of a conversation. Two rules make this work. First, <span class="claim">models keep no state</span>: conversations, history and context live in the control plane, and a harness such as Hermes only sends a session identifier. Second, memory is a budget with reserved lanes, managed by the model manager.</p>
+
+    <figure>
+      <div class="plate">
+        <svg viewBox="0 0 640 330" role="img" aria-labelledby="f-mm">
+          <title id="f-mm">Memory budget on a 32 GB node: a reserve for the operating system and training, a reserve for the administrator, resident models, session caches and free space; plus priority rules per kind of session and the life cycle of a model.</title>
+          <text class="fb" x="20" y="18">Memory on one 32 GB node</text>
+          <defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#e3e6eb"/><line x1="0" y1="0" x2="0" y2="6" stroke="#c3c8d0" stroke-width="2"/></pattern></defs>
+          <rect x="20" y="30" width="188" height="34" fill="url(#hatch)" stroke="#9aa1ad"/>
+          <rect x="208" y="30" width="75" height="34" fill="#f6e4e7" stroke="#a3122a"/>
+          <rect x="283" y="30" width="13" height="34" fill="#1b1e25"/>
+          <rect x="296" y="30" width="66" height="34" fill="#3b4150"/>
+          <rect x="362" y="30" width="112" height="34" fill="#5a6170"/>
+          <rect x="474" y="30" width="28" height="34" fill="#8a919e"/>
+          <rect x="502" y="30" width="118" height="34" fill="#fff" stroke="#9aa1ad"/>
+          <text class="fs" x="114" y="80" text-anchor="middle">macOS and training, 10 GB</text>
+          <text class="fr" x="245" y="80" text-anchor="middle">admin, 4 GB</text>
+          <path class="ln" d="M289 64 V100"/><text class="fs" x="292" y="108">specialist base, 0.7</text>
+          <path class="ln" d="M329 64 V118"/><text class="fs" x="332" y="128">aggregator, 3.5</text>
+          <path class="ln" d="M418 64 V84"/><text class="fs" x="421" y="94">StarCoder2, 6</text>
+          <path class="ln" d="M488 64 V140"/><text class="fs" x="484" y="150" text-anchor="end">adapters and session caches, 1.5</text>
+          <text class="fs" x="561" y="80" text-anchor="middle">free, 6 GB</text>
+
+          <text class="fb" x="20" y="186">Priority by session</text>
+          <rect class="hot" x="20" y="196" width="190" height="66" rx="6"/><text class="fb" x="32" y="215">Administrator</text><text class="fs" x="32" y="232">never refused; may evict</text><text class="fs" x="32" y="246">other sessions' models</text>
+          <rect class="box" x="225" y="196" width="190" height="66" rx="6"/><text class="fb" x="237" y="215">Users</text><text class="fs" x="237" y="232">load only if it fits; else wait</text><text class="fs" x="237" y="246">or get the general specialist</text>
+          <rect class="box" x="430" y="196" width="190" height="66" rx="6"/><text class="fb" x="442" y="215">trainer and curator</text><text class="fs" x="442" y="232">lowest priority, batch work</text><text class="fs" x="442" y="246">when the node is idle</text>
+
+          <text class="fb" x="20" y="292">Model life cycle</text>
+          <rect class="box" x="140" y="280" width="90" height="24" rx="12"/><text class="fl" x="185" y="296" text-anchor="middle">pinned</text>
+          <rect class="box" x="260" y="280" width="90" height="24" rx="12"/><text class="fl" x="305" y="296" text-anchor="middle">warm</text>
+          <rect class="box" x="380" y="280" width="90" height="24" rx="12"/><text class="fl" x="425" y="296" text-anchor="middle">cold</text>
+          <rect class="box" x="500" y="280" width="110" height="24" rx="12"/><text class="fl" x="555" y="296" text-anchor="middle">unloading</text>
+          <path class="ln" d="M230 292 H260 M350 292 H380 M470 292 H500"/>
+          <text class="fs" x="140" y="322">Evict first: idle longest, lowest priority. Nobody is left without an answer.</text>
+        </svg>
+      </div>
+      <figcaption><b>Figure 6.</b> With everything resident, the team uses about 11 GB, leaving room for three users, their session caches and occasional training. The numbers are an estimate for a 32 GB Mac Studio and are configurable.</figcaption>
+    </figure>
+
+    <ul class="plain">
+      <li><b>Administrator.</b> Has a reserved slice of memory, is never refused, and can pin or unload any model from the dashboard.</li>
+      <li><b>Users.</b> Can load a new model only if it fits in free memory. Otherwise the request waits in a queue or is served in degraded mode by the general specialist, but it is always answered. Requests from several users are batched, each with its own context cache.</li>
+      <li><b>The trainer user.</b> A system account whose questions exist only to produce training data. Its trajectories can be published; real users' data never leaves the server. A good question from a real user can be asked again by the trainer, reworded and stripped of personal details.</li>
+    </ul>
+  </section>
+
+  <!-- 10 -->
+  <section id="health">
+    <h2><span class="n">10</span>Keeping the machine healthy</h2>
+    <p>On a machine with unified memory, running out of memory does not just slow models down; it slows the operating system itself. Ariadne protects each node with a watchdog that is always running and that wakes up when something leaves its normal range.</p>
+    <ul class="plain">
+      <li><b>Deterministic, not clever.</b> The watchdog's core is a set of plain rules, not a model. If the machine is in trouble, a model may be too, so the safety net cannot depend on one. A small model can sit on top to explain incidents in the dashboard.</li>
+      <li><b>Local and independent.</b> It runs as a separate system service on each node and survives even if the rest of the stack fails or the network drops in the middle of a heavy load.</li>
+      <li><b>What it watches:</b> memory pressure, swap, temperature and queue latency.</li>
+      <li><b>What it does:</b> unloads cold models, pauses training, blocks new loads and restarts stuck workers.</li>
+    </ul>
+    <p>The control plane decides what is desirable; the watchdog guarantees that nothing crosses a physical limit. If a node disappears, the control plane marks it offline and keeps answering in degraded mode with search results alone.</p>
+  </section>
+
+  <!-- 11 -->
+  <section id="training">
+    <h2><span class="n">11</span>Training, evaluation and lineage</h2>
+    <p>The models are trained on a Mac Studio with MLX. Rented or free cloud GPUs (Kaggle, Colab, RunPod, Vast.ai) can be switched on by the administrator for heavy runs; those use PyTorch, and the resulting adapters are converted back. Training checkpoints often, because free GPUs disappear mid-run.</p>
+
+    <figure>
+      <div class="plate">
+        <svg viewBox="0 0 640 170" role="img" aria-labelledby="f-tr">
+          <title id="f-tr">Training loop: trajectories are filtered, used to train adapters, evaluated in three layers, and deployed only if they beat the previous version in every domain; otherwise the previous version stays.</title>
+          <rect class="box" x="6" y="40" width="104" height="54" rx="6"/><text class="fl" x="58" y="61" text-anchor="middle">Trajectories</text><text class="fs" x="58" y="75" text-anchor="middle">real and trainer</text><text class="fs" x="58" y="87" text-anchor="middle">questions</text>
+          <rect class="box" x="130" y="40" width="104" height="54" rx="6"/><text class="fl" x="182" y="61" text-anchor="middle">Data curation</text><text class="fs" x="182" y="75" text-anchor="middle">verified citations,</text><text class="fs" x="182" y="87" text-anchor="middle">quality signal</text>
+          <rect class="box" x="254" y="40" width="104" height="54" rx="6"/><text class="fl" x="306" y="61" text-anchor="middle">Train adapter</text><text class="fs" x="306" y="75" text-anchor="middle">MLX, or cloud</text><text class="fs" x="306" y="87" text-anchor="middle">PyTorch</text>
+          <rect class="box" x="378" y="40" width="104" height="54" rx="6"/><text class="fl" x="430" y="61" text-anchor="middle">Evaluate</text><text class="fs" x="430" y="75" text-anchor="middle">rules, judge,</text><text class="fs" x="430" y="87" text-anchor="middle">human sample</text>
+          <polygon class="hot" points="550,24 606,67 550,110 494,67"/><text class="fl" x="550" y="64" text-anchor="middle">beats the</text><text class="fl" x="550" y="78" text-anchor="middle">last version?</text>
+          <path class="ln" d="M110 67 H130 M234 67 H254 M358 67 H378 M482 67 H494"/>
+          <path class="rd" d="M606 67 H636"/><text class="fr" x="636" y="58" text-anchor="end">deploy</text>
+          <path class="ln dash" d="M550 110 V130 H58 V94"/><text class="fs" x="300" y="146" text-anchor="middle">no: the previous version stays, and the failure is recorded with its data</text>
+          <text class="fs" x="320" y="18" text-anchor="middle">Golden test set per domain, never used for training. No regression allowed in health.</text>
+        </svg>
+      </div>
+      <figcaption><b>Figure 7.</b> No adapter reaches production by default. Versions are kept, and rolling back takes one click.</figcaption>
+    </figure>
+
+    <h3>Curating the training data</h3>
+    <ol class="plain">
+      <li>Only trajectories whose citations passed verification are eligible.</li>
+      <li>A quality signal is required: positive feedback, or a high score from the judge. Without one, a trajectory stays in quarantine.</li>
+      <li>Real questions weigh more than synthetic ones, and synthetic data has a capped share.</li>
+      <li>Answers with negative feedback are kept as negative examples for reinforcement learning.</li>
+      <li>Nothing from the golden test set, or close to it, ever enters training; duplicates are checked automatically.</li>
+      <li>Every adapter knows exactly which trajectories trained it, so problematic data can be traced and removed.</li>
+    </ol>
+
+    <h3>Three layers of evaluation</h3>
+    <p>Deterministic checks come first because they are cheap: the citation exists and the passage is in the document, the code compiles and passes its tests, the specialist refused when the question was outside its domain. A strong model then acts as judge for correctness, completeness and grounding, against fixed criteria; this is used only to validate the first prototype, not as a permanent part of the system. Finally a person reviews a sample, especially where the judge and the rules disagree.</p>
+
+    <h3>Everything visible in the dashboard</h3>
+    <p>The dashboard records the full lineage: for each training run, the pipeline, the data used, test results, what failed and why; for each question, its trajectory, its citations, whether it passed verification and which runs used it. It also shows the curation state of every article, which models are loaded where and in what state, memory per model and per session, the queue, and every watchdog incident.</p>
+
+    <h3>Backups and public releases</h3>
+    <p>Everything lives on the home server, under its own backup policy. Once a week, an encrypted external release is published to GitHub in parts of at most 2 GB, with a manifest, fingerprints and a restore script: the curated wiki, adapters, trainer data, the approved-model registry and configuration. Real users' data is never included, and base model weights and archives are left out because they can be downloaded again.</p>
+  </section>
+
+  <!-- 12 -->
+  <section id="safety">
+    <h2><span class="n">12</span>Safety by construction</h2>
+    <ul class="plain">
+      <li><b>Injection stopped at the door.</b> Content is cleaned when it enters the wiki. Retrieved text is always passed to models inside clear delimiters, marked as data, and attack examples are part of training and testing.</li>
+      <li><b>Models do not act.</b> Specialists only search and answer. Anything with an effect, such as running code, goes through the system, never directly through a model.</li>
+      <li><b>An isolated sandbox.</b> Each execution runs in a disposable container with no network, a read-only disk, and strict limits on time, memory and processes, on a different machine from the models.</li>
+      <li><b>Health is held to a higher standard.</b> Every health article is curated, every health claim needs a medical source and high confidence, the system says plainly when it does not know, and answers note that it is not a substitute for a professional. When a question shows signs of urgency, such as chest pain or difficulty breathing, the first line tells the person to seek medical help immediately.</li>
+    </ul>
+  </section>
+
+  <!-- 13 -->
+  <section id="yours">
+    <h2><span class="n">13</span>A model of your own</h2>
+    <p>The open libraries are a starting point, not the destination. Because the models learn to search rather than to memorise, the same structure works for knowledge that belongs to you.</p>
+    <ul class="plain">
+      <li>Connect the places where your knowledge already lives, such as Confluence, Azure DevOps wikis or Notion, as new sources next to the public archives.</li>
+      <li>Start from a base that already knows how to search, cite and refuse, trained on the public corpus.</li>
+      <li>Train a small specialist on your own material: smaller than a general model, and sharper in your field.</li>
+      <li>Keep it current without retraining. When your documentation changes, the model reads the new version on its next search.</li>
+    </ul>
+    <p>The result is an assistant that runs on your own hardware, answers from your documents with citations, and never sends them anywhere else.</p>
+  </section>
+
+  <!-- 14 -->
+  <section id="principles">
+    <h2><span class="n">14</span>Design principles</h2>
+    <ul class="plain">
+      <li><b>Offline first.</b> The system works without internet. Cloud GPUs are an optional boost for training, never a dependency.</li>
+      <li><b>Every answer is traceable.</b> Claims cite a specific revision of a specific document.</li>
+      <li><b>Validate before building.</b> Each layer is built only after the one before it has proved its worth.</li>
+      <li><b>Models are replaceable.</b> Knowledge, training data, evaluation sets and pipelines outlive any single model, so moving to a larger one reuses all of them, and a small model can stay on as a fast planner beside a larger one.</li>
+      <li><b>Provenance for models too.</b> Only models on an approved list run, each stored with its origin and original licence, passed on unchanged. Adapters inherit the licence of their base. The project is for non-commercial use.</li>
+      <li><b>Nothing ships untested,</b> and everything that happens is visible in the dashboard.</li>
+    </ul>
+  </section>
+
+  <!-- 15 -->
+  <section id="roadmap">
+    <h2><span class="n">15</span>Status and roadmap</h2>
+    <p>This is a working draft, and the claims in sections 6 to 13 are design decisions and hypotheses until they are measured. The plan is staged so that each phase is useful on its own and the next one starts only when the previous one proves its worth.</p>
+    <div class="tablewrap">
+      <table>
+        <caption><b>Table 3.</b> Project phases.</caption>
+        <thead><tr><th>Phase</th><th>Scope</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Knowledge service: archives, curated wiki, usage-driven vectors, MCP server and dashboard. Useful to any model on day one, and the source of usage logs.</td><td><span class="status now">In progress</span></td></tr>
+          <tr><td>2</td><td>Proof of concept: one small model, one domain (Python), trained to search and cite.</td><td><span class="status">Next</span></td></tr>
+          <tr><td>3</td><td>Router, specialists, aggregator, model manager, watchdog, distributed nodes, optional cloud training, catalogue downloads from the dashboard.</td><td><span class="status">Planned</span></td></tr>
+          <tr><td>4</td><td>Private sources and per-organisation models.</td><td><span class="status">Vision</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 16 -->
+  <section id="evaluation">
+    <h2><span class="n">16</span>The hypothesis to test first</h2>
+    <p>Phase 2 answers one question: <i>does a small model that searches Ariadne answer better than the same model alone?</i> It compares three variants on a few hundred Python questions: the base model without search, the base model with search, and the model trained to search. There is no router, no aggregator and no cloud. Answers are scored by automatic checks (citations exist, code runs) and by a stronger model acting as judge, with a person reviewing a sample.</p>
+    <p>If the trained variant clearly wins, the rest of the architecture is a matter of growing from there. If it does not, the project learns that in weeks rather than after building everything else.</p>
+  </section>
+
+  <section id="references">
+    <h2><span class="n"></span>References</h2>
+    <ol class="refs">
+      <li><a href="https://github.com/VivaldiCode/Ariadne/blob/main/ARCHITECTURE.md">Ariadne architecture: the knowledge service</a> (Portuguese).</li>
+      <li><a href="https://github.com/VivaldiCode/Ariadne/blob/main/ARCHITECTURE-TRAINING.md">Ariadne architecture: model training</a> (Portuguese).</li>
+      <li><a href="https://kiwix.org">Kiwix</a>, offline archives of Wikipedia and other open content.</li>
+      <li><a href="https://js.wiki">Wiki.js</a>, the wiki engine behind the curated corpus.</li>
+      <li><a href="https://github.com/pgvector/pgvector">pgvector</a>, vector similarity search for Postgres.</li>
+      <li><a href="https://modelcontextprotocol.io">Model Context Protocol</a>, the interface between models and the service.</li>
+      <li><a href="https://huggingface.co/HuggingFaceTB/SmolLM2-360M">SmolLM2</a>, <a href="https://huggingface.co/bigcode/starcoder2-3b">StarCoder2</a> and <a href="https://huggingface.co/intfloat/multilingual-e5-small">multilingual-e5-small</a>, open models planned for the first experiments.</li>
+      <li><a href="https://libretranslate.com">LibreTranslate</a>, local machine translation.</li>
+      <li><a href="https://github.com/ml-explore/mlx">MLX</a>, Apple's framework for training on Apple silicon.</li>
+    </ol>
+  </section>
+
+  <footer>
+    <span>An open-source project.</span>
+    <a href="https://github.com/VivaldiCode/Ariadne">github.com/VivaldiCode/Ariadne</a>
+  </footer>
+</main>
+</body>
+</html>

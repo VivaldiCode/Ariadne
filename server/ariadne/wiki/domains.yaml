@@ -1,0 +1,1266 @@
+# A árvore de domínios do Wiki.js (docs/WIKI-IMPORT.md, secção 6).
+#
+# Cada nó tem `id` (estável: é a chave na base de dados; o caminho da página usa os `slugs`),
+# `names`, `slugs` e `descriptions` em `pt` e `en`, e opcionalmente `children`. A descrição vai
+# para os vetores (e5, «passage:»): 1 a 2 frases cheias dos termos que o domínio cobre, escritas
+# como se fossem o início de um artigo desse domínio. Os `slugs` são únicos entre irmãos.
+# O nó `por-classificar` é especial: onde fica o que ainda não foi colocado; não tem vetor.
+#
+# `source_priors` fixa o domínio de fontes especializadas pelo nome do ZIM (maiúsculas ignoradas).
+# Um padrão sem `*` é um prefixo do nome; com `*` é um padrão de ficheiros (fnmatch). Se o domínio
+# do prior não é uma folha, os vetores escolhem a folha dentro dele.
+#
+# Editar este ficheiro e correr `domains.sync_tree` actualiza a tabela `domain`: os nós que saem
+# ficam inativos (não se apagam, as colocações antigas continuam a apontar para eles).
+
+version: 1
+
+domains:
+  # --- saúde ---------------------------------------------------------------------------------
+  - id: saude
+    names: {pt: Saúde, en: Health}
+    slugs: {pt: saude, en: health}
+    descriptions:
+      pt: >-
+        Saúde humana: medicina, doenças, tratamentos, medicamentos, primeiros socorros, nutrição,
+        saúde mental, gravidez e cuidados de saúde, para diagnosticar, tratar e prevenir.
+      en: >-
+        Human health: medicine, diseases, treatments, drugs, first aid, nutrition, mental health,
+        pregnancy and healthcare, to diagnose, treat and prevent illness.
+    children:
+      - id: saude/medicamentos
+        names: {pt: Medicamentos, en: Medicines}
+        slugs: {pt: medicamentos, en: medicines}
+        descriptions:
+          pt: >-
+            Medicamentos e fármacos: para que serve, dose, efeitos secundários, interações,
+            contraindicações, quem pode ou não tomar, analgésicos, antibióticos, anti-inflamatórios
+            e insulina.
+          en: >-
+            Medicines and drugs: what it is used for, dose, side effects, interactions,
+            contraindications, who can and cannot take it, painkillers, antibiotics,
+            anti-inflammatories and insulin.
+      - id: saude/doencas
+        names: {pt: Doenças e condições, en: Diseases and conditions}
+        slugs: {pt: doencas, en: diseases}
+        descriptions:
+          pt: >-
+            Doenças e condições clínicas: sintomas, causas, diagnóstico, tratamento e prognóstico
+            de infeções, doenças crónicas, genéticas e do coração, cancro, diabetes e alergias.
+          en: >-
+            Diseases and medical conditions: symptoms, causes, diagnosis, treatment and prognosis
+            of infections, chronic and genetic disorders, heart disease, cancer, diabetes and
+            allergies.
+      - id: saude/primeiros-socorros
+        names: {pt: Primeiros socorros e emergência, en: First aid and emergency}
+        slugs: {pt: primeiros-socorros, en: first-aid}
+        descriptions:
+          pt: >-
+            Primeiros socorros e medicina de emergência: reanimação, hemorragia, queimaduras,
+            fraturas, envenenamento, trauma, choque, vias aéreas e triagem no atendimento urgente.
+          en: >-
+            First aid and emergency medicine: resuscitation, bleeding, burns, fractures,
+            poisoning, trauma, shock, airway management and triage in urgent care.
+      - id: saude/nutricao
+        names: {pt: Nutrição, en: Nutrition}
+        slugs: {pt: nutricao, en: nutrition}
+        descriptions:
+          pt: >-
+            Nutrição e dieta: calorias, proteínas, vitaminas, minerais, hidratos de carbono,
+            gorduras, alimentação saudável, obesidade, desnutrição e suplementos alimentares.
+          en: >-
+            Nutrition and diet: calories, proteins, vitamins, minerals, carbohydrates, fats,
+            healthy eating, obesity, malnutrition and dietary supplements.
+      - id: saude/saude-mental
+        names: {pt: Saúde mental, en: Mental health}
+        slugs: {pt: saude-mental, en: mental-health}
+        descriptions:
+          pt: >-
+            Saúde mental e psicologia: depressão, ansiedade, stress, perturbações do humor e do
+            sono, psicoterapia, comportamento, dependências e bem-estar emocional.
+          en: >-
+            Mental health and psychology: depression, anxiety, stress, mood and sleep disorders,
+            psychotherapy, behaviour, addiction and emotional wellbeing.
+      - id: saude/saude-reprodutiva
+        names: {pt: Saúde reprodutiva, en: Reproductive health}
+        slugs: {pt: saude-reprodutiva, en: reproductive-health}
+        descriptions:
+          pt: >-
+            Saúde reprodutiva e sexual: contraceção, gravidez, parto, amamentação, fertilidade,
+            menstruação, menopausa, infeções sexualmente transmissíveis e planeamento familiar.
+          en: >-
+            Reproductive and sexual health: contraception, pregnancy, childbirth, breastfeeding,
+            fertility, menstruation, menopause, sexually transmitted infections and family
+            planning.
+      - id: saude/corpo-humano
+        names: {pt: Corpo humano, en: Human body}
+        slugs: {pt: corpo-humano, en: human-body}
+        descriptions:
+          pt: >-
+            Anatomia e fisiologia do corpo humano: órgãos, músculos, ossos, nervos, sistema
+            circulatório, respiratório e digestivo, células, hormonas e o funcionamento do corpo.
+          en: >-
+            Human anatomy and physiology: organs, muscles, bones, nerves, circulatory,
+            respiratory and digestive systems, cells, hormones and how the body works.
+      - id: saude/saude-publica
+        names: {pt: Saúde pública, en: Public health}
+        slugs: {pt: saude-publica, en: public-health}
+        descriptions:
+          pt: >-
+            Saúde pública: epidemiologia, vacinação, higiene, prevenção de doenças, surtos e
+            pandemias, serviços de saúde, rastreios e políticas de saúde de uma população.
+          en: >-
+            Public health: epidemiology, vaccination, hygiene, disease prevention, outbreaks and
+            pandemics, health services, screening and population health policy.
+
+  # --- alimentação ---------------------------------------------------------------------------
+  - id: alimentacao
+    names: {pt: Alimentação, en: Food}
+    slugs: {pt: alimentacao, en: food}
+    descriptions:
+      pt: >-
+        Alimentação e cozinha: receitas, ingredientes, técnicas culinárias e a conservação dos
+        alimentos para guardar comida em casa.
+      en: >-
+        Food and cooking: recipes, ingredients, culinary techniques and food preservation to
+        store food at home.
+    children:
+      - id: alimentacao/receitas
+        names: {pt: Receitas, en: Recipes}
+        slugs: {pt: receitas, en: recipes}
+        descriptions:
+          pt: >-
+            Receitas de cozinha: ingredientes, quantidades, modo de preparação, forno, fritar,
+            cozer, assar, massas, pão, bolos, sobremesas, molhos, carne, peixe e legumes.
+          en: >-
+            Cooking recipes: ingredients, quantities, preparation method, oven, frying, boiling,
+            baking, pasta, bread, cakes, desserts, sauces, meat, fish and vegetables.
+      - id: alimentacao/conservacao
+        names: {pt: Conservação de alimentos, en: Food preservation}
+        slugs: {pt: conservacao, en: preservation}
+        descriptions:
+          pt: >-
+            Conservação de alimentos: conservas, secagem, desidratação, fumeiro, salga, curtimenta,
+            fermentação, congelação, esterilização em frascos, armazenamento e segurança alimentar.
+          en: >-
+            Food preservation: canning, drying, dehydration, smoking, salting, pickling,
+            fermentation, freezing, sterilising in jars, storage and food safety.
+
+  # --- agricultura ---------------------------------------------------------------------------
+  - id: agricultura
+    names: {pt: Agricultura, en: Agriculture}
+    slugs: {pt: agricultura, en: agriculture}
+    descriptions:
+      pt: >-
+        Agricultura e vida rural: cultivar a terra, solos, hortas, culturas, pragas, animais de
+        criação, abelhas e floresta.
+      en: >-
+        Agriculture and rural life: farming the land, soils, gardens, crops, pests, livestock,
+        bees and forestry.
+    children:
+      - id: agricultura/solos-e-compostagem
+        names: {pt: Solos e compostagem, en: Soils and composting}
+        slugs: {pt: solos-e-compostagem, en: soils-and-composting}
+        descriptions:
+          pt: >-
+            Solos e compostagem: fertilidade, húmus, adubos, estrume, composto, minhocas,
+            correção do pH, erosão, rega e rotação de culturas para melhorar a terra.
+          en: >-
+            Soils and composting: fertility, humus, fertilisers, manure, compost, worms, pH
+            correction, erosion, irrigation and crop rotation to improve the land.
+      - id: agricultura/culturas
+        names: {pt: Culturas e horta, en: Crops and gardening}
+        slugs: {pt: culturas, en: crops}
+        descriptions:
+          pt: >-
+            Culturas agrícolas e horta: sementeira, plantação, colheita, cereais, batata, feijão,
+            hortaliças, árvores de fruto, estufas, jardinagem e calendário agrícola.
+          en: >-
+            Crops and vegetable gardening: sowing, planting, harvest, cereals, potatoes, beans,
+            vegetables, fruit trees, greenhouses, gardening and planting calendar.
+      - id: agricultura/pragas
+        names: {pt: Pragas e doenças das plantas, en: Pests and plant diseases}
+        slugs: {pt: pragas, en: pests}
+        descriptions:
+          pt: >-
+            Pragas e doenças das plantas: insetos, fungos, ervas daninhas, roedores, pesticidas,
+            controlo biológico, armadilhas e proteção das culturas e do armazém de grãos.
+          en: >-
+            Pests and plant diseases: insects, fungi, weeds, rodents, pesticides, biological
+            control, traps and protection of crops and grain stores.
+      - id: agricultura/pecuaria
+        names: {pt: Pecuária, en: Livestock}
+        slugs: {pt: pecuaria, en: livestock}
+        descriptions:
+          pt: >-
+            Pecuária e animais de criação: gado, vacas, ovelhas, cabras, porcos, galinhas, coelhos,
+            ração, leite, ovos, abate, veterinária e doenças dos animais.
+          en: >-
+            Livestock and farm animals: cattle, cows, sheep, goats, pigs, chickens, rabbits, feed,
+            milk, eggs, slaughter, veterinary care and animal diseases.
+      - id: agricultura/apicultura
+        names: {pt: Apicultura, en: Beekeeping}
+        slugs: {pt: apicultura, en: beekeeping}
+        descriptions:
+          pt: >-
+            Apicultura, a criação de abelhas: colmeias, apiário, enxames, abelha-rainha, zângãos,
+            varroa, extração do mel, cera e polinização pelas abelhas melíferas.
+          en: >-
+            Beekeeping, the rearing of honey bees: hives, apiary, swarms, queen bee, drones, varroa
+            mites, honey extraction, beeswax and pollination by honeybees.
+      - id: agricultura/silvicultura
+        names: {pt: Silvicultura, en: Forestry}
+        slugs: {pt: silvicultura, en: forestry}
+        descriptions:
+          pt: >-
+            Silvicultura e floresta: árvores, madeira, lenha, reflorestação, gestão florestal,
+            incêndios florestais, cortiça, resina e agrossilvicultura.
+          en: >-
+            Forestry and woodland: trees, timber, firewood, reforestation, forest management,
+            wildfires, cork, resin and agroforestry.
+
+  # --- água e saneamento ---------------------------------------------------------------------
+  - id: agua
+    names: {pt: Água e saneamento, en: Water and sanitation}
+    slugs: {pt: agua-e-saneamento, en: water-and-sanitation}
+    descriptions:
+      pt: >-
+        Água potável e saneamento: obter, tratar e distribuir água e tratar as águas usadas e os
+        dejetos.
+      en: >-
+        Drinking water and sanitation: obtaining, treating and distributing water and handling
+        wastewater and human waste.
+    children:
+      - id: agua/tratamento
+        names: {pt: Tratamento de água, en: Water treatment}
+        slugs: {pt: tratamento, en: treatment}
+        descriptions:
+          pt: >-
+            Tratamento e purificação de água: filtros, desinfeção com cloro, fervura, desinfeção
+            solar, sedimentação, carvão ativado, turbidez, água potável segura e análises.
+          en: >-
+            Water treatment and purification: filters, chlorine disinfection, boiling, solar
+            disinfection, sedimentation, activated carbon, turbidity, safe drinking water and
+            testing.
+      - id: agua/abastecimento
+        names: {pt: Abastecimento de água, en: Water supply}
+        slugs: {pt: abastecimento, en: supply}
+        descriptions:
+          pt: >-
+            Abastecimento de água: poços, furos, nascentes, bombas manuais, cisternas, captação da
+            chuva, reservatórios, canalização, rega e distribuição de água a uma comunidade.
+          en: >-
+            Water supply: wells, boreholes, springs, hand pumps, cisterns, rainwater harvesting,
+            reservoirs, piping, irrigation and distributing water to a community.
+      - id: agua/saneamento
+        names: {pt: Saneamento, en: Sanitation}
+        slugs: {pt: saneamento, en: sanitation}
+        descriptions:
+          pt: >-
+            Saneamento básico: latrinas, fossas sépticas, esgotos, águas residuais, retretes
+            secas, tratamento de dejetos, lagunagem, higiene das mãos e lixo.
+          en: >-
+            Basic sanitation: latrines, septic tanks, sewers, wastewater, dry toilets, excreta
+            treatment, lagoons, handwashing and waste disposal.
+
+  # --- energia -------------------------------------------------------------------------------
+  - id: energia
+    names: {pt: Energia, en: Energy}
+    slugs: {pt: energia, en: energy}
+    descriptions:
+      pt: >-
+        Energia: produzir, armazenar e usar energia, do sol, do vento, da água, da biomassa e da
+        eletricidade.
+      en: >-
+        Energy: producing, storing and using energy from the sun, wind, water, biomass and
+        electricity.
+    children:
+      - id: energia/solar
+        names: {pt: Energia solar, en: Solar energy}
+        slugs: {pt: solar, en: solar}
+        descriptions:
+          pt: >-
+            Energia solar: painéis fotovoltaicos, coletores solares térmicos, fornos solares,
+            inversores, controladores de carga, baterias, orientação e aquecimento de água.
+          en: >-
+            Solar energy: photovoltaic panels, solar thermal collectors, solar cookers, inverters,
+            charge controllers, batteries, orientation and water heating.
+      - id: energia/eolica
+        names: {pt: Energia eólica, en: Wind energy}
+        slugs: {pt: eolica, en: wind}
+        descriptions:
+          pt: >-
+            Energia eólica: aerogeradores, turbinas de vento, pás, torres, moinhos de vento,
+            bombas eólicas, velocidade do vento e geradores de baixa potência.
+          en: >-
+            Wind energy: wind turbines, blades, towers, windmills, wind pumps, wind speed and
+            small-scale generators.
+      - id: energia/hidrica
+        names: {pt: Energia hídrica, en: Hydropower}
+        slugs: {pt: hidrica, en: hydropower}
+        descriptions:
+          pt: >-
+            Energia hídrica: minihídricas, rodas de água, turbinas, açudes, queda de água, caudal,
+            barragens, bombas de aríete hidráulico e produção de eletricidade com rios.
+          en: >-
+            Hydropower: micro-hydro, water wheels, turbines, weirs, head, flow rate, dams,
+            hydraulic ram pumps and generating electricity from rivers.
+      - id: energia/biomassa
+        names: {pt: Biomassa e combustíveis, en: Biomass and fuels}
+        slugs: {pt: biomassa, en: biomass}
+        descriptions:
+          pt: >-
+            Biomassa e combustíveis: lenha, carvão vegetal, biogás, biodigestores, biodiesel,
+            etanol, pellets, fogões eficientes, fogões de lenha e gasogénios.
+          en: >-
+            Biomass and fuels: firewood, charcoal, biogas, digesters, biodiesel, ethanol, pellets,
+            efficient stoves, wood stoves and gasifiers.
+      - id: energia/eletricidade
+        names: {pt: Eletricidade, en: Electricity}
+        slugs: {pt: eletricidade, en: electricity}
+        descriptions:
+          pt: >-
+            Eletricidade: tensão, corrente, potência, circuitos, instalação elétrica, cabos,
+            quadros, geradores, baterias, acumuladores, transformadores e segurança elétrica.
+          en: >-
+            Electricity: voltage, current, power, circuits, electrical wiring, cables, panels,
+            generators, batteries, accumulators, transformers and electrical safety.
+
+  # --- construção e habitação ----------------------------------------------------------------
+  - id: construcao
+    names: {pt: Construção e habitação, en: Construction and housing}
+    slugs: {pt: construcao, en: construction}
+    descriptions:
+      pt: >-
+        Construção e habitação: construir, isolar e manter uma casa, com os materiais, as técnicas
+        e as reparações domésticas.
+      en: >-
+        Construction and housing: building, insulating and maintaining a home, with materials,
+        techniques and household repairs.
+    children:
+      - id: construcao/materiais
+        names: {pt: Materiais de construção, en: Building materials}
+        slugs: {pt: materiais, en: materials}
+        descriptions:
+          pt: >-
+            Materiais de construção: madeira, tijolo, adobe, taipa, pedra, betão, cimento,
+            argamassa, cal, bambu, telhas, vidro, aço e materiais naturais ou reciclados.
+          en: >-
+            Building materials: timber, brick, adobe, rammed earth, stone, concrete, cement,
+            mortar, lime, bamboo, roof tiles, glass, steel and natural or recycled materials.
+      - id: construcao/tecnicas
+        names: {pt: Técnicas de construção, en: Building techniques}
+        slugs: {pt: tecnicas, en: techniques}
+        descriptions:
+          pt: >-
+            Técnicas de construção: fundações, paredes, telhados, estruturas, alvenaria,
+            carpintaria, autoconstrução, abrigos, cabanas, projeto, plantas e medições de obra.
+          en: >-
+            Building techniques: foundations, walls, roofs, framing, masonry, carpentry,
+            self-build, shelters, cabins, design, plans and site measurements.
+      - id: construcao/isolamento
+        names: {pt: Isolamento e climatização, en: Insulation and climate control}
+        slugs: {pt: isolamento, en: insulation}
+        descriptions:
+          pt: >-
+            Isolamento e climatização: isolamento térmico, aquecimento, arrefecimento, ventilação,
+            humidade, janelas, lareiras, bombas de calor, conforto térmico e poupança de energia.
+          en: >-
+            Insulation and climate control: thermal insulation, heating, cooling, ventilation,
+            damp, windows, fireplaces, heat pumps, thermal comfort and energy saving.
+      - id: construcao/reparacoes
+        names: {pt: Reparações domésticas, en: Home repairs}
+        slugs: {pt: reparacoes, en: repairs}
+        descriptions:
+          pt: >-
+            Reparações domésticas e bricolage: canalização, torneiras, pintura, pavimentos,
+            azulejos, portas, fechaduras, tomadas e interruptores, humidade em paredes e obras
+            faça-você-mesmo.
+          en: >-
+            Home repairs and DIY: plumbing, taps, painting, flooring, tiles, doors, locks, sockets
+            and switches, damp walls and do-it-yourself renovation.
+
+  # --- transportes ---------------------------------------------------------------------------
+  - id: transportes
+    names: {pt: Transportes, en: Transport}
+    slugs: {pt: transportes, en: transport}
+    descriptions:
+      pt: >-
+        Transportes: veículos, estradas, bicicletas e navegação, para se deslocar e manter os
+        meios de transporte.
+      en: >-
+        Transport: vehicles, roads, bicycles and navigation, for getting around and maintaining
+        the means of transport.
+    children:
+      - id: transportes/automoveis
+        names: {pt: Automóveis, en: Cars}
+        slugs: {pt: automoveis, en: cars}
+        descriptions:
+          pt: >-
+            Automóveis, operação e manutenção: motor, travões, bateria do carro, óleo, pneus,
+            caixa de velocidades, suspensão, escape, avarias, diagnóstico, camiões e tratores.
+          en: >-
+            Cars, operation and maintenance: engine, brakes, car battery, oil, tyres, gearbox,
+            suspension, exhaust, breakdowns, diagnostics, trucks and tractors.
+      - id: transportes/estradas
+        names: {pt: Estradas e pontes, en: Roads and bridges}
+        slugs: {pt: estradas, en: roads}
+        descriptions:
+          pt: >-
+            Estradas e pontes: construção de caminhos, pavimentos, drenagem, pontes, travessias de
+            rios, vias-férreas, túneis, manutenção de vias e engenharia de tráfego.
+          en: >-
+            Roads and bridges: building tracks, paving, drainage, bridges, river crossings,
+            railways, tunnels, road maintenance and traffic engineering.
+      - id: transportes/bicicletas
+        names: {pt: Bicicletas, en: Bicycles}
+        slugs: {pt: bicicletas, en: bicycles}
+        descriptions:
+          pt: >-
+            Bicicletas: quadro, rodas, corrente, mudanças, travões, pedais, manutenção, reparação
+            de furos, bicicletas elétricas e de carga e mobilidade a pedal.
+          en: >-
+            Bicycles: frame, wheels, chain, gears, brakes, pedals, maintenance, puncture repair,
+            electric and cargo bikes and pedal-powered mobility.
+      - id: transportes/navegacao
+        names: {pt: Navegação, en: Navigation}
+        slugs: {pt: navegacao, en: navigation}
+        descriptions:
+          pt: >-
+            Navegação e barcos: embarcações, velas, remos, marés, cartas náuticas, bússola, rumo,
+            navegação astronómica, portos, aviação e segurança no mar.
+          en: >-
+            Navigation and boats: vessels, sails, oars, tides, nautical charts, compass, heading,
+            celestial navigation, harbours, aviation and safety at sea.
+
+  # --- eletrónica ----------------------------------------------------------------------------
+  - id: eletronica
+    names: {pt: Eletrónica e reparação, en: Electronics and repair}
+    slugs: {pt: eletronica, en: electronics}
+    descriptions:
+      pt: >-
+        Eletrónica e reparação de equipamentos: circuitos, componentes, rádio e arranjo de
+        aparelhos, telemóveis e eletrodomésticos.
+      en: >-
+        Electronics and equipment repair: circuits, components, radio and fixing devices, phones
+        and appliances.
+    children:
+      - id: eletronica/circuitos
+        names: {pt: Circuitos e componentes, en: Circuits and components}
+        slugs: {pt: circuitos, en: circuits}
+        descriptions:
+          pt: >-
+            Circuitos eletrónicos e componentes: resistências, condensadores, díodos, transístores,
+            amplificadores operacionais, microcontroladores, Arduino, placas de circuito, soldar e
+            osciloscópio.
+          en: >-
+            Electronic circuits and components: resistors, capacitors, diodes, transistors,
+            operational amplifiers, microcontrollers, Arduino, circuit boards, soldering and
+            oscilloscope.
+      - id: eletronica/reparacao
+        names: {pt: Reparação de equipamentos, en: Equipment repair}
+        slugs: {pt: reparacao, en: repair}
+        descriptions:
+          pt: >-
+            Reparação de equipamentos: guia passo a passo para desmontar e substituir o ecrã, a
+            bateria, o disco ou uma peça de telemóveis, portáteis, consolas, máquinas de cortar
+            relva e eletrodomésticos.
+          en: >-
+            Equipment repair: step-by-step guides to disassemble and replace the screen, battery,
+            drive or a part in phones, laptops, consoles, lawn mowers and household appliances.
+      - id: eletronica/radio
+        names: {pt: Rádio e comunicações, en: Radio and communications}
+        slugs: {pt: radio-e-comunicacoes, en: radio-and-communications}
+        descriptions:
+          pt: >-
+            Rádio e comunicações: radioamador, antenas, emissores, recetores, frequências,
+            modulação, rádio de emergência, telefonia, sinais de comunicação e telecomunicações.
+          en: >-
+            Radio and communications: amateur radio, antennas, transmitters, receivers,
+            frequencies, modulation, emergency radio, telephony, communication signals and
+            telecommunications.
+
+  # --- informática ---------------------------------------------------------------------------
+  - id: informatica
+    names: {pt: Informática, en: Computing}
+    slugs: {pt: informatica, en: computing}
+    descriptions:
+      pt: >-
+        Informática: programação, sistemas operativos, redes, software e segurança de computadores
+        e de dados.
+      en: >-
+        Computing: programming, operating systems, networks, software and computer and data
+        security.
+    children:
+      - id: informatica/programacao
+        names: {pt: Programação, en: Programming}
+        slugs: {pt: programacao, en: programming}
+        descriptions:
+          pt: >-
+            Programação: linguagens (Python, C, JavaScript), funções, classes, módulos, bibliotecas,
+            API, algoritmos, estruturas de dados, bases de dados, testes e documentação de código.
+          en: >-
+            Programming: languages (Python, C, JavaScript), functions, classes, modules, libraries,
+            API, algorithms, data structures, databases, testing and code documentation.
+      - id: informatica/sistemas-operativos
+        names: {pt: Sistemas operativos, en: Operating systems}
+        slugs: {pt: sistemas-operativos, en: operating-systems}
+        descriptions:
+          pt: >-
+            Sistemas operativos: Linux, Gentoo, Alpine, Windows, macOS, kernel, instalação,
+            partições, bootloader, pacotes, serviços, shell, terminal e administração de sistemas.
+          en: >-
+            Operating systems: Linux, Gentoo, Alpine, Windows, macOS, kernel, installation,
+            partitions, bootloader, packages, services, shell, terminal and system administration.
+      - id: informatica/redes
+        names: {pt: Redes, en: Networking}
+        slugs: {pt: redes, en: networking}
+        descriptions:
+          pt: >-
+            Redes de computadores: TCP/IP, DNS, DHCP, routers, firewall, Wi-Fi, OpenWrt, VPN,
+            encaminhamento, portas, sub-redes, servidores e traffic shaping.
+          en: >-
+            Computer networks: TCP/IP, DNS, DHCP, routers, firewall, Wi-Fi, OpenWrt, VPN, routing,
+            ports, subnets, servers and traffic shaping.
+      - id: informatica/software
+        names: {pt: Software e aplicações, en: Software and applications}
+        slugs: {pt: software, en: software}
+        descriptions:
+          pt: >-
+            Software e aplicações: programas de escritório, editores, navegadores, bases de
+            dados, ferramentas livres, instalação e uso de aplicações, formatos de ficheiros e
+            automatização.
+          en: >-
+            Software and applications: office programs, editors, browsers, databases, free
+            tools, installing and using applications, file formats and automation.
+      - id: informatica/seguranca
+        names: {pt: Segurança informática, en: Computer security}
+        slugs: {pt: seguranca, en: security}
+        descriptions:
+          pt: >-
+            Segurança informática: criptografia, palavras-passe, autenticação, vulnerabilidades,
+            malware, ataques, cópias de segurança, privacidade e proteção de dados.
+          en: >-
+            Computer security: cryptography, passwords, authentication, vulnerabilities, malware,
+            attacks, backups, privacy and data protection.
+
+  # --- ciências ------------------------------------------------------------------------------
+  - id: ciencias
+    names: {pt: Ciências, en: Sciences}
+    slugs: {pt: ciencias, en: sciences}
+    descriptions:
+      pt: >-
+        Ciências da natureza: física, química, biologia, astronomia, geologia e ambiente, para
+        compreender o mundo natural.
+      en: >-
+        Natural sciences: physics, chemistry, biology, astronomy, geology and environment, to
+        understand the natural world.
+    children:
+      - id: ciencias/fisica
+        names: {pt: Física, en: Physics}
+        slugs: {pt: fisica, en: physics}
+        descriptions:
+          pt: >-
+            Física: mecânica, movimento, força, energia, calor, termodinâmica, ondas, luz, óptica,
+            eletromagnetismo, relatividade e física quântica, partículas e átomos.
+          en: >-
+            Physics: mechanics, motion, force, energy, heat, thermodynamics, waves, light, optics,
+            electromagnetism, relativity and quantum physics, particles and atoms.
+      - id: ciencias/quimica
+        names: {pt: Química, en: Chemistry}
+        slugs: {pt: quimica, en: chemistry}
+        descriptions:
+          pt: >-
+            Química: elementos, tabela periódica, átomos, moléculas, ligações, reações, ácidos e
+            bases, soluções, compostos orgânicos, materiais e experiências de laboratório.
+          en: >-
+            Chemistry: elements, periodic table, atoms, molecules, bonds, reactions, acids and
+            bases, solutions, organic compounds, materials and laboratory experiments.
+      - id: ciencias/biologia
+        names: {pt: Biologia, en: Biology}
+        slugs: {pt: biologia, en: biology}
+        descriptions:
+          pt: >-
+            Biologia: células, genética, ADN, evolução, espécies, taxonomia, plantas, animais,
+            insetos, aves, fungos, bactérias, vírus, microbiologia e ecologia.
+          en: >-
+            Biology: cells, genetics, DNA, evolution, species, taxonomy, plants, animals, insects,
+            birds, fungi, bacteria, viruses, microbiology and ecology.
+      - id: ciencias/astronomia
+        names: {pt: Astronomia, en: Astronomy}
+        slugs: {pt: astronomia, en: astronomy}
+        descriptions:
+          pt: >-
+            Astronomia: estrelas, planetas, sistema solar, galáxias, luas, cometas, buracos negros,
+            telescópios, cosmologia, órbitas, exploração espacial e o universo.
+          en: >-
+            Astronomy: stars, planets, solar system, galaxies, moons, comets, black holes,
+            telescopes, cosmology, orbits, space exploration and the universe.
+      - id: ciencias/geologia
+        names: {pt: Geologia, en: Geology}
+        slugs: {pt: geologia, en: geology}
+        descriptions:
+          pt: >-
+            Geologia: rochas, minerais, fósseis, vulcões, sismos, placas tectónicas, solos,
+            cavernas, relevo, erosão, clima, meteorologia e a história da Terra.
+          en: >-
+            Geology: rocks, minerals, fossils, volcanoes, earthquakes, tectonic plates, soils,
+            caves, landforms, erosion, climate, meteorology and Earth history.
+      - id: ciencias/ambiente
+        names: {pt: Ambiente e ecologia, en: Environment and ecology}
+        slugs: {pt: ambiente, en: environment}
+        descriptions:
+          pt: >-
+            Ambiente e ecologia: ecossistemas, biodiversidade, poluição, alterações climáticas,
+            reciclagem, resíduos, conservação da natureza, desenvolvimento sustentável e recursos
+            naturais.
+          en: >-
+            Environment and ecology: ecosystems, biodiversity, pollution, climate change,
+            recycling, waste, nature conservation, sustainable development and natural resources.
+
+  # --- matemática ----------------------------------------------------------------------------
+  - id: matematica
+    names: {pt: Matemática e estatística, en: Mathematics and statistics}
+    slugs: {pt: matematica, en: mathematics}
+    descriptions:
+      pt: >-
+        Matemática e estatística: números, equações, geometria, cálculo, probabilidades e a
+        análise de dados.
+      en: >-
+        Mathematics and statistics: numbers, equations, geometry, calculus, probability and data
+        analysis.
+    children:
+      - id: matematica/matematica-pura
+        names: {pt: Álgebra, geometria e cálculo, en: Algebra, geometry and calculus}
+        slugs: {pt: algebra-e-calculo, en: algebra-and-calculus}
+        descriptions:
+          pt: >-
+            Matemática: números, aritmética, álgebra, equações, funções, geometria, trigonometria,
+            cálculo, derivadas, integrais, matrizes, teoria dos números, demonstrações e problemas.
+          en: >-
+            Mathematics: numbers, arithmetic, algebra, equations, functions, geometry,
+            trigonometry, calculus, derivatives, integrals, matrices, number theory, proofs and
+            problems.
+      - id: matematica/estatistica
+        names: {pt: Estatística e probabilidades, en: Statistics and probability}
+        slugs: {pt: estatistica, en: statistics}
+        descriptions:
+          pt: >-
+            Estatística e probabilidades: média, variância, distribuições, amostragem, regressão,
+            testes de hipóteses, intervalos de confiança, correlação e análise de dados.
+          en: >-
+            Statistics and probability: mean, variance, distributions, sampling, regression,
+            hypothesis tests, confidence intervals, correlation and data analysis.
+
+  # --- engenharia e oficina ------------------------------------------------------------------
+  - id: engenharia
+    names: {pt: Engenharia e oficina, en: Engineering and workshop}
+    slugs: {pt: engenharia, en: engineering}
+    descriptions:
+      pt: >-
+        Engenharia e oficina: mecânica, metais, ferramentas e fabrico, para construir, consertar e
+        fazer peças e máquinas.
+      en: >-
+        Engineering and workshop: mechanics, metals, tools and fabrication, to build, fix and make
+        parts and machines.
+    children:
+      - id: engenharia/mecanica
+        names: {pt: Mecânica, en: Mechanics}
+        slugs: {pt: mecanica, en: mechanics}
+        descriptions:
+          pt: >-
+            Mecânica e máquinas: engrenagens, rolamentos, eixos, alavancas, polias, molas, motores,
+            bombas, hidráulica, pneumática, transmissões, lubrificação e projeto de máquinas.
+          en: >-
+            Mechanics and machines: gears, bearings, shafts, levers, pulleys, springs, engines,
+            pumps, hydraulics, pneumatics, transmissions, lubrication and machine design.
+      - id: engenharia/metalurgia
+        names: {pt: Metalurgia, en: Metalworking}
+        slugs: {pt: metalurgia, en: metalworking}
+        descriptions:
+          pt: >-
+            Metalurgia e trabalho de metais: ferro, aço, ligas, fundição, forja, ferreiro,
+            soldadura, têmpera, corte e tratamento térmico dos metais.
+          en: >-
+            Metallurgy and metalworking: iron, steel, alloys, casting, forging, blacksmithing,
+            welding, tempering, cutting and heat treatment of metals.
+      - id: engenharia/ferramentas
+        names: {pt: Ferramentas, en: Tools}
+        slugs: {pt: ferramentas, en: tools}
+        descriptions:
+          pt: >-
+            Ferramentas manuais e elétricas: martelo, serra, plaina, berbequim, lima, chaves,
+            alicates, afiar, escolher, usar e conservar ferramentas e montar uma oficina.
+          en: >-
+            Hand and power tools: hammer, saw, plane, drill, file, wrenches, pliers, sharpening,
+            choosing, using and maintaining tools and setting up a workshop.
+      - id: engenharia/fabrico
+        names: {pt: Fabrico e marcenaria, en: Fabrication and woodworking}
+        slugs: {pt: fabrico, en: fabrication}
+        descriptions:
+          pt: >-
+            Fabrico: marcenaria, carpintaria, impressão 3D, CNC, plásticos, cola, juntas de
+            madeira, tornearia, protótipos, projetos de hardware aberto e tecnologia apropriada.
+          en: >-
+            Fabrication: woodworking, carpentry, 3D printing, CNC, plastics, glue, wood joints,
+            turning, prototypes, open hardware projects and appropriate technology.
+
+  # --- sobrevivência e preparação ------------------------------------------------------------
+  - id: sobrevivencia
+    names: {pt: Sobrevivência e preparação, en: Survival and preparedness}
+    slugs: {pt: sobrevivencia, en: survival}
+    descriptions:
+      pt: >-
+        Sobrevivência e preparação para emergências: aguentar catástrofes, ficar sem
+        eletricidade ou sem apoio e saber desenrascar-se em ambientes selvagens.
+      en: >-
+        Survival and emergency preparedness: coping with disasters, power cuts or no outside help
+        and getting by in the wilderness.
+    children:
+      - id: sobrevivencia/equipamento
+        names: {pt: Equipamento, en: Gear}
+        slugs: {pt: equipamento, en: gear}
+        descriptions:
+          pt: >-
+            Equipamento de sobrevivência e acampamento: facas de mato, machados, mochilas, kits de
+            emergência, lanternas, espelhos de sinalização, sacos-cama, tendas e fogareiros, e
+            avaliação de produtos.
+          en: >-
+            Survival and camping gear: bushcraft knives, axes, backpacks, emergency kits,
+            flashlights, signal mirrors, sleeping bags, tents and camp stoves, and product
+            reviews.
+      - id: sobrevivencia/abrigo-e-fogo
+        names: {pt: Abrigo e fogo, en: Shelter and fire}
+        slugs: {pt: abrigo-e-fogo, en: shelter-and-fire}
+        descriptions:
+          pt: >-
+            Fazer fogo e construir um abrigo improvisado na natureza para sobreviver ao frio:
+            fogueira, acendalhas, pederneira, lume, cabana de ramos, lona, hipotermia e perder-se
+            no mato.
+          en: >-
+            Making fire and building an improvised shelter in the wilderness to survive the cold:
+            campfire, tinder, flint, lean-to of branches, tarp, hypothermia and being lost in the
+            woods.
+      - id: sobrevivencia/emergencias
+        names: {pt: Emergências e catástrofes, en: Emergencies and disasters}
+        slugs: {pt: emergencias, en: emergencies}
+        descriptions:
+          pt: >-
+            Preparação para emergências e catástrofes: planos, reservas de comida e água, apagões,
+            sismos, inundações, tempestades, evacuação, comunicações de emergência e comunidade.
+          en: >-
+            Preparing for emergencies and disasters: plans, food and water stockpiles, blackouts,
+            earthquakes, floods, storms, evacuation, emergency communications and community.
+      - id: sobrevivencia/alimento-selvagem
+        names: {pt: Alimento selvagem, en: Wild food}
+        slugs: {pt: alimento-selvagem, en: wild-food}
+        descriptions:
+          pt: >-
+            Alimento selvagem: recoleção de plantas comestíveis, cogumelos, caça, armadilhas,
+            pesca, aves, peixe, limpar e preparar animais e identificar plantas venenosas.
+          en: >-
+            Wild food: foraging edible plants, mushrooms, hunting, traps, fishing, birds, fish,
+            cleaning and preparing game and identifying poisonous plants.
+
+  # --- geografia e viagens -------------------------------------------------------------------
+  - id: geografia
+    names: {pt: Geografia e viagens, en: Geography and travel}
+    slugs: {pt: geografia, en: geography}
+    descriptions:
+      pt: >-
+        Geografia e viagens: países, regiões, cidades, mapas e guias para viajar e conhecer o
+        mundo.
+      en: >-
+        Geography and travel: countries, regions, cities, maps and guides for travelling and
+        learning about the world.
+    children:
+      - id: geografia/paises
+        names: {pt: Países e regiões, en: Countries and regions}
+        slugs: {pt: paises, en: countries}
+        descriptions:
+          pt: >-
+            Países e regiões: população, capital, área, fronteiras, economia, governo, línguas,
+            clima, indicadores, estatísticas, demografia e dados por país.
+          en: >-
+            Countries and regions: population, capital, area, borders, economy, government,
+            languages, climate, indicators, statistics, demographics and country data.
+      - id: geografia/viagens
+        names: {pt: Guias de viagem, en: Travel guides}
+        slugs: {pt: viagens, en: travel}
+        descriptions:
+          pt: >-
+            Guias de viagem: cidades e destinos, o que ver, como chegar, onde dormir, onde comer,
+            transportes locais, preços, segurança, vistos, aldeias e itinerários.
+          en: >-
+            Travel guides: cities and destinations, what to see, how to get there, where to stay,
+            where to eat, local transport, prices, safety, visas, villages and itineraries.
+      - id: geografia/cartografia
+        names: {pt: Mapas e cartografia, en: Maps and cartography}
+        slugs: {pt: cartografia, en: cartography}
+        descriptions:
+          pt: >-
+            Mapas e cartografia: OpenStreetMap, GPS, coordenadas, projeções, etiquetas de mapa,
+            camadas, escalas, topografia, sistemas de informação geográfica e mapeamento.
+          en: >-
+            Maps and cartography: OpenStreetMap, GPS, coordinates, projections, map tags, layers,
+            scales, topography, geographic information systems and mapping.
+
+  # --- história ------------------------------------------------------------------------------
+  - id: historia
+    names: {pt: História, en: History}
+    slugs: {pt: historia, en: history}
+    descriptions:
+      pt: >-
+        História: acontecimentos, civilizações, guerras e épocas do passado e a forma como o
+        mundo mudou.
+      en: >-
+        History: events, civilisations, wars and eras of the past and how the world has changed.
+    children:
+      - id: historia/antiga-e-medieval
+        names: {pt: Antiguidade e Idade Média, en: Ancient and medieval history}
+        slugs: {pt: antiga-e-medieval, en: ancient-and-medieval}
+        descriptions:
+          pt: >-
+            História antiga e medieval: Egito, Grécia, Roma, impérios, reinos, feudalismo,
+            cruzadas, Idade Média, descobrimentos, arqueologia e civilizações antigas.
+          en: >-
+            Ancient and medieval history: Egypt, Greece, Rome, empires, kingdoms, feudalism,
+            crusades, the Middle Ages, exploration, archaeology and ancient civilisations.
+      - id: historia/moderna-e-contemporanea
+        names: {pt: História moderna e contemporânea, en: Modern history}
+        slugs: {pt: moderna-e-contemporanea, en: modern}
+        descriptions:
+          pt: >-
+            História moderna e contemporânea: revoluções, colonialismo, Revolução Industrial,
+            século XX, ditaduras, 25 de Abril, democracia, descolonização e Guerra Fria.
+          en: >-
+            Modern and contemporary history: revolutions, colonialism, the Industrial Revolution,
+            the twentieth century, dictatorships, democracy, decolonisation and the Cold War.
+      - id: historia/militar
+        names: {pt: História militar, en: Military history}
+        slugs: {pt: militar, en: military}
+        descriptions:
+          pt: >-
+            História militar: guerras, batalhas, exércitos, estratégia, armas, regulamentos
+            militares, marinha, aviação militar, Primeira e Segunda Guerra Mundial e fortificações.
+          en: >-
+            Military history: wars, battles, armies, strategy, weapons, military regulations,
+            navy, military aviation, the First and Second World Wars and fortifications.
+
+  # --- sociedade, direito e cidadania --------------------------------------------------------
+  - id: sociedade
+    names: {pt: Sociedade, direito e cidadania, en: Society, law and citizenship}
+    slugs: {pt: sociedade, en: society}
+    descriptions:
+      pt: >-
+        Sociedade, direito e cidadania: leis, direitos e deveres, serviços públicos, política e
+        a vida em comunidade.
+      en: >-
+        Society, law and citizenship: laws, rights and duties, public services, politics and
+        community life.
+    children:
+      - id: sociedade/direito
+        names: {pt: Direito, en: Law}
+        slugs: {pt: direito, en: law}
+        descriptions:
+          pt: >-
+            Direito e leis: constituição, tribunais, contratos, arrendamento, herança, crimes,
+            direitos do consumidor, direito do trabalho, propriedade, processos e advogados.
+          en: >-
+            Law: constitution, courts, contracts, tenancy, inheritance, crimes, consumer rights,
+            employment law, property, legal procedures and lawyers.
+      - id: sociedade/cidadania
+        names: {pt: Direitos e serviços públicos, en: Rights and public services}
+        slugs: {pt: cidadania, en: citizenship}
+        descriptions:
+          pt: >-
+            Cidadania e serviços públicos: segurança social, subsídios, pensões, saúde pública,
+            habitação social, educação, imigração, asilo, autorização de residência e burocracia.
+          en: >-
+            Citizenship and public services: social welfare, benefits, pensions, health services,
+            social housing, education, immigration, asylum, residence permits and paperwork.
+      - id: sociedade/politica
+        names: {pt: Política e instituições, en: Politics and institutions}
+        slugs: {pt: politica, en: politics}
+        descriptions:
+          pt: >-
+            Política e instituições: governo, parlamento, eleições, partidos, democracia,
+            Estados, União Europeia, Nações Unidas, relações internacionais e administração pública.
+          en: >-
+            Politics and institutions: government, parliament, elections, parties, democracy,
+            states, the European Union, United Nations, international relations and public
+            administration.
+      - id: sociedade/comunidade
+        names: {pt: Sociedade e cultura, en: Society and culture}
+        slugs: {pt: comunidade, en: community}
+        descriptions:
+          pt: >-
+            Sociedade e cultura: sociologia, antropologia, família, educação das crianças,
+            comunidades, costumes, tradições, igualdade, trabalho voluntário e desenvolvimento
+            comunitário.
+          en: >-
+            Society and culture: sociology, anthropology, family, raising children, communities,
+            customs, traditions, equality, volunteering and community development.
+
+  # --- economia ------------------------------------------------------------------------------
+  - id: economia
+    names: {pt: Economia, en: Economics}
+    slugs: {pt: economia, en: economics}
+    descriptions:
+      pt: >-
+        Economia: dinheiro, mercados, trabalho, finanças e negócios, de pessoas, empresas e
+        países.
+      en: >-
+        Economics: money, markets, work, finance and business, of people, companies and
+        countries.
+    children:
+      - id: economia/financas
+        names: {pt: Finanças pessoais, en: Personal finance}
+        slugs: {pt: financas, en: finance}
+        descriptions:
+          pt: >-
+            Finanças pessoais: orçamento, poupança, crédito, empréstimos, juros, impostos, IRS,
+            seguros, investimento, reforma, contas bancárias e dívida.
+          en: >-
+            Personal finance: budgeting, savings, credit, loans, interest, taxes, insurance,
+            investing, retirement, bank accounts and debt.
+      - id: economia/negocios
+        names: {pt: Negócios e gestão, en: Business and management}
+        slugs: {pt: negocios, en: business}
+        descriptions:
+          pt: >-
+            Negócios e gestão: criar uma empresa, empreendedorismo, marketing, vendas, contabilidade,
+            cooperativas, microcrédito, comércio, artesanato como negócio e gestão de projetos.
+          en: >-
+            Business and management: starting a company, entrepreneurship, marketing, sales,
+            accounting, cooperatives, microcredit, trade, crafts as a business and project
+            management.
+      - id: economia/teoria
+        names: {pt: Teoria económica, en: Economic theory}
+        slugs: {pt: teoria, en: theory}
+        descriptions:
+          pt: >-
+            Teoria económica: oferta e procura, inflação, PIB, desemprego, comércio internacional,
+            moeda, banca central, crescimento, desigualdade e sistemas económicos.
+          en: >-
+            Economic theory: supply and demand, inflation, GDP, unemployment, international trade,
+            currency, central banks, growth, inequality and economic systems.
+
+  # --- filosofia e religião ------------------------------------------------------------------
+  - id: filosofia
+    names: {pt: Filosofia e religião, en: Philosophy and religion}
+    slugs: {pt: filosofia, en: philosophy}
+    descriptions:
+      pt: >-
+        Filosofia e religião: pensamento, ética, crenças, tradições religiosas e as grandes
+        perguntas sobre a existência.
+      en: >-
+        Philosophy and religion: thought, ethics, beliefs, religious traditions and the big
+        questions about existence.
+    children:
+      - id: filosofia/historia-da-filosofia
+        names: {pt: Filósofos e correntes, en: Philosophers and schools}
+        slugs: {pt: filosofos, en: philosophers}
+        descriptions:
+          pt: >-
+            Filósofos e correntes: Platão, Aristóteles, Kant, existencialismo, empirismo,
+            racionalismo, filosofia chinesa e indiana, metafísica, epistemologia e história das
+            ideias.
+          en: >-
+            Philosophers and schools of thought: Plato, Aristotle, Kant, existentialism,
+            empiricism, rationalism, Chinese and Indian philosophy, metaphysics, epistemology and
+            the history of ideas.
+      - id: filosofia/etica-e-logica
+        names: {pt: Ética e lógica, en: Ethics and logic}
+        slugs: {pt: etica-e-logica, en: ethics-and-logic}
+        descriptions:
+          pt: >-
+            Ética e lógica: moral, virtude, justiça, dever, consequencialismo, antinatalismo,
+            argumentos, falácias, raciocínio, filosofia da mente, da linguagem e da ciência.
+          en: >-
+            Ethics and logic: morality, virtue, justice, duty, consequentialism, antinatalism,
+            arguments, fallacies, reasoning, philosophy of mind, language and science.
+      - id: filosofia/religiao
+        names: {pt: Religião e mitologia, en: Religion and mythology}
+        slugs: {pt: religiao, en: religion}
+        descriptions:
+          pt: >-
+            Religião e mitologia: cristianismo, islão, judaísmo, budismo, hinduísmo, Bíblia,
+            Alcorão, deuses, mitos, rituais, teologia, espiritualidade e história das religiões.
+          en: >-
+            Religion and mythology: Christianity, Islam, Judaism, Buddhism, Hinduism, the Bible,
+            the Quran, gods, myths, rituals, theology, spirituality and the history of religions.
+
+  # --- línguas e literatura ------------------------------------------------------------------
+  - id: linguas
+    names: {pt: Línguas e literatura, en: Languages and literature}
+    slugs: {pt: linguas, en: languages}
+    descriptions:
+      pt: >-
+        Línguas e literatura: dicionários, gramática, aprendizagem de línguas e obras literárias.
+      en: >-
+        Languages and literature: dictionaries, grammar, language learning and literary works.
+    children:
+      - id: linguas/dicionarios
+        names: {pt: Dicionários, en: Dictionaries}
+        slugs: {pt: dicionarios, en: dictionaries}
+        descriptions:
+          pt: >-
+            Dicionário: entrada de uma palavra com classe gramatical (substantivo, verbo,
+            adjetivo), significado, definição, etimologia, flexão, pronúncia, sinónimos e traduções.
+          en: >-
+            Dictionary: entry for a word with its part of speech (noun, verb, adjective), meaning,
+            definition, etymology, inflection, pronunciation, synonyms and translations.
+      - id: linguas/gramatica
+        names: {pt: Gramática e aprendizagem, en: Grammar and learning}
+        slugs: {pt: gramatica, en: grammar}
+        descriptions:
+          pt: >-
+            Gramática e aprendizagem de línguas: ortografia, sintaxe, verbos, vocabulário,
+            fonética, linguística, escrita, tradução, alfabetos, escrita e como aprender uma língua.
+          en: >-
+            Grammar and language learning: spelling, syntax, verbs, vocabulary, phonetics,
+            linguistics, writing, translation, alphabets and how to learn a language.
+      - id: linguas/obras
+        names: {pt: Obras literárias, en: Literary works}
+        slugs: {pt: obras, en: works}
+        descriptions:
+          pt: >-
+            Obras literárias: romances, contos, poesia, teatro, ensaios, capítulos de livros
+            clássicos, personagens, enredo, autores, crítica literária e textos de domínio público.
+          en: >-
+            Literary works: novels, short stories, poetry, drama, essays, chapters of classic
+            books, characters, plot, authors, literary criticism and public domain texts.
+
+  # --- artes e música ------------------------------------------------------------------------
+  - id: artes
+    names: {pt: Artes e música, en: Arts and music}
+    slugs: {pt: artes, en: arts}
+    descriptions:
+      pt: >-
+        Artes e música: criação artística, música, pintura, cinema, ofícios e artesanato.
+      en: >-
+        Arts and music: artistic creation, music, painting, film, crafts and handicrafts.
+    children:
+      - id: artes/musica
+        names: {pt: Música, en: Music}
+        slugs: {pt: musica, en: music}
+        descriptions:
+          pt: >-
+            Música: compositores, obras, sinfonias, quartetos, instrumentos, notas, harmonia,
+            teoria musical, canções, álbuns, bandas, géneros e concertos.
+          en: >-
+            Music: composers, works, symphonies, quartets, instruments, notes, harmony, music
+            theory, songs, albums, bands, genres and concerts.
+      - id: artes/artes-visuais
+        names: {pt: Artes visuais, en: Visual arts}
+        slugs: {pt: artes-visuais, en: visual-arts}
+        descriptions:
+          pt: >-
+            Artes visuais: pintura, escultura, desenho, fotografia, arquitetura, design, museus,
+            movimentos artísticos e história da arte.
+          en: >-
+            Visual arts: painting, sculpture, drawing, photography, architecture, design, museums,
+            art movements and art history.
+      - id: artes/cinema
+        names: {pt: Cinema, teatro e televisão, en: Film, theatre and television}
+        slugs: {pt: cinema, en: film}
+        descriptions:
+          pt: >-
+            Cinema, teatro e televisão: filmes, séries, realizadores, atores, elenco, enredo,
+            canais de televisão, programas, estreias, prémios e espetáculos.
+          en: >-
+            Film, theatre and television: movies, series, directors, actors, cast, plot,
+            television channels, programmes, premieres, awards and performances.
+      - id: artes/artesanato
+        names: {pt: Artesanato, en: Crafts}
+        slugs: {pt: artesanato, en: crafts}
+        descriptions:
+          pt: >-
+            Artesanato e ofícios: costura, tricô, tecelagem, cerâmica, olaria, cestaria, couro,
+            vime, sabão, velas, tinturaria e trabalhos manuais tradicionais.
+          en: >-
+            Handicrafts and trades: sewing, knitting, weaving, ceramics, pottery, basketry,
+            leather, wicker, soap, candles, dyeing and traditional handwork.
+
+  # --- educação ------------------------------------------------------------------------------
+  - id: educacao
+    names: {pt: Educação, en: Education}
+    slugs: {pt: educacao, en: education}
+    descriptions:
+      pt: >-
+        Educação: ensinar e aprender, com métodos de ensino e cursos e exercícios.
+      en: >-
+        Education: teaching and learning, with teaching methods, courses and exercises.
+    children:
+      - id: educacao/ensino
+        names: {pt: Ensino e pedagogia, en: Teaching and pedagogy}
+        slugs: {pt: ensino, en: teaching}
+        descriptions:
+          pt: >-
+            Ensino e pedagogia: métodos de ensino, plano de aula, professores, avaliação,
+            currículo, escolas, aprendizagem das crianças, educação de adultos e alfabetização.
+          en: >-
+            Teaching and pedagogy: teaching methods, lesson plans, teachers, assessment,
+            curriculum, schools, children's learning, adult education and literacy.
+      - id: educacao/cursos
+        names: {pt: Cursos e exercícios, en: Courses and exercises}
+        slugs: {pt: cursos, en: courses}
+        descriptions:
+          pt: >-
+            Cursos e exercícios: lições, módulos, problemas resolvidos, desafios de código, vídeos
+            de aulas, exercícios de matemática, tutoriais passo a passo e testes de revisão.
+          en: >-
+            Courses and exercises: lessons, modules, worked problems, coding challenges, lecture
+            videos, maths exercises, step-by-step tutorials and review quizzes.
+
+  # --- desporto e lazer ----------------------------------------------------------------------
+  - id: desporto
+    names: {pt: Desporto e lazer, en: Sport and leisure}
+    slugs: {pt: desporto-e-lazer, en: sport-and-leisure}
+    descriptions:
+      pt: >-
+        Desporto e lazer: exercício, modalidades desportivas, jogos e passatempos.
+      en: >-
+        Sport and leisure: exercise, sports, games and hobbies.
+    children:
+      - id: desporto/exercicio
+        names: {pt: Exercício físico, en: Physical exercise}
+        slugs: {pt: exercicio, en: exercise}
+        descriptions:
+          pt: >-
+            Exercício físico: treino, corrida, musculação, alongamentos, condição física,
+            ioga, resistência, lesões desportivas, aquecimento e planos de treino.
+          en: >-
+            Physical exercise: training, running, strength training, stretching, fitness, yoga,
+            endurance, sports injuries, warm-up and training plans.
+      - id: desporto/modalidades
+        names: {pt: Modalidades e competições, en: Sports and competitions}
+        slugs: {pt: modalidades, en: sports}
+        descriptions:
+          pt: >-
+            Modalidades desportivas e competições: futebol, ténis, natação, atletismo, equipas,
+            campeonatos, jogadores, regras, resultados, clubes e Jogos Olímpicos.
+          en: >-
+            Sports and competitions: football, tennis, swimming, athletics, teams, championships,
+            players, rules, results, clubs and the Olympic Games.
+      - id: desporto/passatempos
+        names: {pt: Jogos e passatempos, en: Games and hobbies}
+        slugs: {pt: passatempos, en: hobbies}
+        descriptions:
+          pt: >-
+            Jogos e passatempos: jogos de tabuleiro e de cartas, xadrez, videojogos, quebra-cabeças,
+            campismo, pesca desportiva, colecionismo, animais de estimação e tempo livre.
+          en: >-
+            Games and hobbies: board and card games, chess, video games, puzzles, camping, sport
+            fishing, collecting, pets and free time.
+
+  # --- biografias ----------------------------------------------------------------------------
+  - id: biografias
+    names: {pt: Biografias, en: Biographies}
+    slugs: {pt: biografias, en: biographies}
+    descriptions:
+      pt: >-
+        Biografias: a vida de pessoas, onde e quando nasceram, a carreira e o que fizeram.
+      en: >-
+        Biographies: the lives of people, where and when they were born, their careers and what
+        they did.
+    children:
+      - id: biografias/ciencia-e-tecnologia
+        names: {pt: Cientistas e inventores, en: Scientists and inventors}
+        slugs: {pt: ciencia-e-tecnologia, en: science-and-technology}
+        descriptions:
+          pt: >-
+            Biografia de um cientista, médico, matemático, engenheiro ou inventor: nasceu, estudou,
+            descobertas, invenções, prémios e morreu.
+          en: >-
+            Biography of a scientist, physician, mathematician, engineer or inventor: born,
+            studied, discoveries, inventions, awards and died.
+      - id: biografias/artes-e-letras
+        names: {pt: Artistas e escritores, en: Artists and writers}
+        slugs: {pt: artes-e-letras, en: arts-and-letters}
+        descriptions:
+          pt: >-
+            Biografia de um artista, músico, ator, escritor ou poeta: nasceu, formação, obras mais
+            conhecidas, carreira, prémios e vida pessoal.
+          en: >-
+            Biography of an artist, musician, actor, writer or poet: born, training, best-known
+            works, career, awards and personal life.
+      - id: biografias/politica-e-guerra
+        names: {pt: Políticos e militares, en: Politicians and military figures}
+        slugs: {pt: politica-e-guerra, en: politics-and-war}
+        descriptions:
+          pt: >-
+            Biografia de um político, governante, militar, rei ou ativista: nasceu, cargos,
+            mandato, batalhas, partido, reformas e morte.
+          en: >-
+            Biography of a politician, ruler, soldier, king or activist: born, offices, term in
+            power, battles, party, reforms and death.
+      - id: biografias/outras
+        names: {pt: Outras pessoas, en: Other people}
+        slugs: {pt: outras, en: others}
+        descriptions:
+          pt: >-
+            Biografia de uma pessoa: desportistas, empresários, exploradores, religiosos e outras
+            personalidades; nasceu em, carreira, feitos e vida.
+          en: >-
+            Biography of a person: athletes, businesspeople, explorers, religious figures and
+            other public figures; born in, career, achievements and life.
+
+  # --- o que ainda não foi colocado ----------------------------------------------------------
+  - id: por-classificar
+    names: {pt: Por classificar, en: Unsorted}
+    slugs: {pt: por-classificar, en: unsorted}
+    descriptions:
+      pt: Páginas ainda sem domínio atribuído, à espera de classificação.
+      en: Pages with no domain assigned yet, waiting to be classified.
+
+source_priors:
+  # transportes, construção, alimentação, eletrónica
+  - {pattern: mechanics.stackexchange, domain: transportes/automoveis}
+  - {pattern: bicycles.stackexchange, domain: transportes/bicicletas}
+  - {pattern: diy.stackexchange, domain: construcao/reparacoes}
+  - {pattern: cooking.stackexchange, domain: alimentacao/receitas}
+  - {pattern: publicdomainrecipes, domain: alimentacao/receitas}
+  - {pattern: electronics.stackexchange, domain: eletronica}
+  - {pattern: ifixit, domain: eletronica}
+  # saúde
+  - {pattern: wikem, domain: saude}
+  - {pattern: mdwiki, domain: saude}
+  - {pattern: nhs, domain: saude}
+  - {pattern: medlineplus, domain: saude}
+  - {pattern: zimgit-medicine, domain: saude}
+  # informática
+  - {pattern: devdocs_*, domain: informatica}
+  - {pattern: docs.python.org, domain: informatica/programacao}
+  - {pattern: openwrt, domain: informatica}
+  - {pattern: gentoo, domain: informatica}
+  - {pattern: alpinelinux, domain: informatica}
+  - {pattern: stackoverflow, domain: informatica}
+  - {pattern: askubuntu, domain: informatica/sistemas-operativos}
+  - {pattern: unix.stackexchange, domain: informatica/sistemas-operativos}
+  - {pattern: superuser, domain: informatica}
+  - {pattern: serverfault, domain: informatica}
+  - {pattern: freecodecamp, domain: educacao/cursos}
+  # geografia, línguas, água, outros especializados
+  - {pattern: wikivoyage, domain: geografia}
+  - {pattern: theworldfactbook, domain: geografia/paises}
+  - {pattern: openstreetmap-wiki, domain: geografia/cartografia}
+  - {pattern: wiktionary, domain: linguas/dicionarios}
+  - {pattern: zimgit-water, domain: agua}
+  - {pattern: internet-encyclopedia-philosophy, domain: filosofia}
+  - {pattern: trueprepper, domain: sobrevivencia}
+  - {pattern: outdoors.stackexchange, domain: sobrevivencia}
+  - {pattern: gardening.stackexchange, domain: agricultura/culturas}
+  - {pattern: math.stackexchange, domain: matematica}
+  - {pattern: stats.stackexchange, domain: matematica/estatistica}
+  - {pattern: physics.stackexchange, domain: ciencias/fisica}
+  - {pattern: chemistry.stackexchange, domain: ciencias/quimica}
+  - {pattern: biology.stackexchange, domain: ciencias/biologia}
+  - {pattern: astronomy.stackexchange, domain: ciencias/astronomia}
+  - {pattern: law.stackexchange, domain: sociedade/direito}
+  - {pattern: money.stackexchange, domain: economia/financas}
+  - {pattern: travel.stackexchange, domain: geografia/viagens}
+  - {pattern: history.stackexchange, domain: historia}
+  - {pattern: music.stackexchange, domain: artes/musica}
+  - {pattern: chess.stackexchange, domain: desporto/passatempos}

@@ -1,0 +1,127 @@
+/* Página inicial («biblioteca»): barra de topo com a marca e os filtros, cartões «Card» para os livros. */
+
+/* ---- barra de topo ---- */
+.kiwixNav {
+  position: sticky; top: 0; z-index: 3; width: 100%;
+  background: var(--ink-2); border-bottom: var(--border);
+  padding: var(--space-s) var(--gutter) var(--space-m);
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-s) var(--space-m);
+}
+.kiwixNav__bar { flex: 1 1 100%; display: flex; align-items: center; justify-content: space-between; gap: var(--space-m); }
+.kiwixNav__tools { display: flex; align-items: center; gap: var(--space-s); }
+.kiwixNav__tools a { display: inline-flex; align-items: center; justify-content: center; min-width: var(--target-min); min-height: var(--target-min); }
+.feedLogo { height: 28px; width: 28px; }
+.kiwixNav__filters { display: flex; flex-wrap: wrap; gap: var(--space-s); margin: 0; }
+.kiwixNav__SearchForm { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-s); }
+.kiwixNav__select { position: relative; display: flex; min-width: 0; }
+.kiwixNav__select::after {
+  content: ""; position: absolute; right: var(--space-12); top: 50%; width: 6px; height: 6px; margin-top: -5px;
+  border-right: 2px solid var(--stone); border-bottom: 2px solid var(--stone); transform: rotate(45deg); pointer-events: none;
+}
+.kiwixNav__kiwixFilter {
+  -webkit-appearance: none; appearance: none; outline: 0; box-shadow: none; cursor: pointer;
+  width: 230px; max-width: 100%; min-height: var(--target); padding: 0 var(--space-xl) 0 var(--space-12);
+  background: var(--ink-0); color: var(--bone); border: var(--border); border-radius: var(--radius); font: inherit;
+}
+.kiwixNav__kiwixFilter option { background: var(--ink-2); color: var(--bone); }
+.kiwixSearch {
+  width: 280px; max-width: 100%; min-height: var(--target); padding: 0 var(--space-xl) 0 var(--space-12);
+  background-color: var(--ink-0); color: var(--bone); border: var(--border); border-radius: var(--radius); font: inherit;
+  background-image: url('../skin/search-icon.svg?KIWIXCACHEID'); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px;
+}
+.kiwixSearch::placeholder { color: var(--stone); }
+.kiwixNav__kiwixFilter:focus-visible, .kiwixSearch:focus-visible { border-color: var(--thread-text); outline-offset: 0; }
+/* botão «Search»: o secundário do DS, em contorno Bone, 48 px */
+.kiwixButton {
+  min-height: var(--target); padding: 0 20px; border-radius: var(--radius); cursor: pointer;
+  font: inherit; font-weight: 500; font-size: 15px; color: var(--bone); background: transparent; border: 1px solid var(--bone);
+}
+.kiwixButtonHover:hover { background: var(--bone); color: var(--ink); }
+.tagFilterLabel {
+  display: none; width: max-content; padding: 0 var(--space-s); line-height: 24px;
+  font-family: var(--font-mono); font-weight: 500; font-size: var(--fs-tag); letter-spacing: var(--ls-tag); text-transform: uppercase;
+  color: var(--stone); background: transparent; border: var(--border); border-radius: 0; margin: 0;
+}
+.tag__link { cursor: pointer; color: var(--stone); }
+.tag__link:hover { color: var(--bone); text-decoration: underline; }
+
+/* ---- corpo ---- */
+.kiwixHomeBody { position: relative; display: flex; flex-direction: column; align-items: center; width: 100%; min-height: calc(100vh - 220px); padding: var(--space-l) var(--gutter) var(--space-section-mobile); }
+.book__list { position: relative; margin: 0 auto; padding-top: var(--space-xl); max-width: var(--content-max); }
+.kiwixHomeBody__results {
+  margin: 0; position: absolute; top: var(--space-xs); left: var(--space-s);
+  font-family: var(--font-mono); font-weight: 500; font-size: var(--fs-label); line-height: var(--lh-label);
+  letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--stone);
+}
+.book__link { text-decoration: none; color: inherit; }
+.book__link:hover { text-decoration: none; }
+.book__wrapper {
+  --tile-width: 264px;
+  position: relative; display: flex; flex-direction: column; justify-content: space-between; gap: var(--space-s);
+  width: var(--tile-width); height: 232px; margin: var(--space-s);
+  background: var(--ink-2); border: var(--border); border-radius: 0; color: var(--body);
+}
+.book__wrapper:hover { border-color: var(--wall); }
+.book__link__wrapper {
+  display: grid; grid-template-areas: "bookIcon bookHeader" "bookDesc bookDesc"; grid-template-columns: 56px 1fr; grid-template-rows: 64px 1fr;
+  padding: var(--space-m) var(--space-m) 0; column-gap: var(--space-12);
+}
+.book__icon {
+  grid-area: bookIcon; width: 48px; height: 48px; background-repeat: no-repeat; background-size: 100%; background-color: var(--ink-0); border: var(--border);
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none"><path d="M20 20h88v88H20zM42 42h44v44" stroke="%236b6355" stroke-width="8"/><path d="M4 64h26V32h68v64H54V64h12" stroke="%23e2502a" stroke-width="10.4" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+}
+.book__header { grid-area: bookHeader; display: grid; align-items: center; align-content: center; min-width: 0; height: 48px; }
+.book__title {
+  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  font-weight: 600; font-size: var(--fs-heading-3); line-height: var(--lh-heading-3); color: var(--bone);
+}
+#book__title { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-weight: 600; font-size: var(--fs-heading-3); line-height: var(--lh-heading-3); color: var(--bone); }
+.book__description {
+  grid-area: bookDesc; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical;
+  font-size: var(--fs-small); line-height: var(--lh-small); color: var(--stone);
+}
+.book__meta { display: flex; justify-content: space-between; align-items: center; gap: var(--space-s); padding: 0 var(--space-m); }
+/* «Tag»: contorno Line, mono em maiúsculas, Stone */
+.book__languageTag {
+  display: flex; align-items: center; justify-content: center; min-width: 32px; height: 24px; padding: 0 var(--space-s);
+  background: transparent; border: var(--border); border-radius: 0; color: var(--stone);
+  font-family: var(--font-mono); font-weight: 500; font-size: var(--fs-tag); letter-spacing: var(--ls-tag); text-transform: uppercase;
+}
+.book__tags { display: flex; justify-content: flex-end; overflow: hidden; text-align: end; font-family: var(--font-mono); font-size: var(--fs-tag); letter-spacing: var(--ls-tag); text-transform: uppercase; color: var(--stone); }
+.book__tags--wrapper { overflow: hidden; display: -webkit-box; margin: auto 0; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
+/* descarregar: o secundário do DS (contorno Bone) */
+.book__download {
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: var(--space-s);
+  min-height: var(--target); margin: 0 var(--space-m) var(--space-m); padding: 0 var(--space-m);
+  color: var(--bone); background: transparent; border: 1px solid var(--bone); border-radius: var(--radius); text-decoration: none;
+  position: static; width: auto; left: auto; font-weight: 500; font-size: 15px;
+}
+.book__download > img { height: 16px; width: 16px; }
+.book__download > span { position: static; font-family: var(--font-text); color: inherit; }
+.book__download:hover { background: var(--bone); color: var(--ink); text-decoration: none; }
+.book__download:hover > img { filter: invert(1); }
+.modal-content div { width: 100%; height: auto; min-height: var(--target-min); }
+.modal-content a { text-decoration: none; }
+.modal-content a > div { position: static; text-decoration: underline; font-size: var(--fs-small); color: var(--body); }
+.modal-content img { display: inline-block; margin: 0 var(--space-12) 0 0; height: 28px; vertical-align: middle; }
+.fadeOut { position: fixed; display: none; bottom: 0; left: 0; z-index: 1; background: linear-gradient(180deg, rgba(14, 13, 11, 0) 0%, var(--ink) 100%); height: 80px; width: 100%; pointer-events: none; }
+.noResults { font-size: var(--fs-body); line-height: var(--lh-body); text-align: center; color: var(--stone); max-width: 70ch; }
+.noResults > a { color: var(--thread-text); }
+.loader-spinner { position: absolute; top: -50%; left: 50%; width: 48px; height: 2px; margin: 35px 0 -35px -24px; background: var(--thread); z-index: 2; border: 0; }
+.loader { display: none; position: relative; height: 70px; width: 100%; background: transparent; border: 0; padding: 0; transform: none; top: auto; left: auto; }
+.kiwixfooter {
+  display: flex; width: 100%; justify-content: center; text-align: center; height: auto; padding: var(--space-l) var(--gutter);
+  border-top: var(--border); font-family: var(--font-mono); font-size: var(--fs-tag); letter-spacing: var(--ls-tag); text-transform: uppercase; color: var(--stone);
+}
+.kiwixfooter > a { width: auto; color: var(--stone); }
+.kiwixfooter > a:hover { color: var(--bone); }
+
+@media (min-width: 640px) { :root { --gutter: 24px; } }
+@media (min-width: 1000px) { :root { --gutter: 40px; } .kiwixHomeBody { padding-bottom: var(--space-section-desktop); } }
+@media screen and (max-width: 590px) {
+  .kiwixNav__filters, .kiwixNav__SearchForm { flex-direction: column; align-items: stretch; }
+  .kiwixNav__kiwixFilter, .kiwixSearch { width: 100%; }
+  .kiwixHomeBody { min-height: calc(100vh - 360px); }
+  .book__wrapper { --tile-width: 100%; width: calc(100vw - 2 * var(--gutter)); margin: var(--space-s) 0; }
+  .brand__tag { display: none; }
+}
