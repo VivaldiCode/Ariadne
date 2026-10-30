@@ -55,7 +55,7 @@ COPY deploy/postgres/gpu-gateway.sql ./deploy/postgres/
 COPY --from=web /web/dist ./web
 RUN uv sync --frozen --no-dev --extra kaggle
 
-RUN useradd --system --uid 1000 --home-dir /app ariadne \
+RUN useradd --uid 1000 --home-dir /app ariadne \
   && mkdir -p /models /backups /courses && chown ariadne:ariadne /models /backups /courses   # os volumes herdam o dono
 USER ariadne
 

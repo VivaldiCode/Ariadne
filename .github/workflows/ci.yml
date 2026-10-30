@@ -1,6 +1,7 @@
 name: CI
 
-# Web (types, tests, build) and server (ruff, mypy, pytest). The tests that need the other Compose
+# Runs on the maintainer's own CI runner (GitHub Actions is turned off for this repository). Web (types, tests, build) and
+# server (ruff, mypy, pytest). The tests that need the other Compose
 # services (kiwix, Moodle, Jobe, Calibre, Kavita) or download a model are deselected here; the rest
 # run against a real Postgres with pgvector, in temporary databases.
 on:
@@ -11,13 +12,15 @@ on:
 permissions:
   contents: read
 
+# One run at a time: the jobs share the runner host (host networking), so the Postgres service port
+# must not be taken twice.
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  group: ariadne-ci
+  cancel-in-progress: false
 
 jobs:
   web:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: web
@@ -26,15 +29,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: npm
-          cache-dependency-path: web/package-lock.json
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
 
   server:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: server
@@ -44,22 +45,36 @@ jobs:
         env:
           POSTGRES_USER: ariadne
           POSTGRES_PASSWORD: ci-only-password
-        ports:
-          - 5432:5432
+          # The runner uses host networking: the service listens on the host, on a port nobody else uses.
+          PGPORT: "55432"
         options: >-
-          --health-cmd "pg_isready -U ariadne"
+          --health-cmd "pg_isready -U ariadne -p 55432"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 12
     env:
-      POSTGRES_PASSWORD: ci-only-password
-      POSTGRES_PORT: "5432"
+      TEST_DATABASE_URL: postgresql+psycopg://ariadne:ci-only-password@localhost:55432/postgres
       EMBEDDER: fake
+      # The runner workspace sits on a network file system that refuses the clones and hard links uv makes by default
+      # ("Resource temporarily unavailable"): copy the files and keep the cache inside the container.
+      UV_LINK_MODE: copy
+      UV_CACHE_DIR: /tmp/uv-cache
+      UV_CONCURRENT_INSTALLS: "1"
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
+      # Only the actions mirrored on the maintainer's own CI server are available (checkout, setup-node, upload/download-artifact):
+      # uv comes from PyPI.
+      - name: Install uv
+        run: python3 -m pip install --break-system-packages --quiet uv
+      # A few tests need the age, ssh-keygen and psql binaries and pg_dump 17 (they skip themselves when these are missing;
+      # pg_dump refuses a server newer than itself, so the client comes from the PostgreSQL apt repository).
+      - name: Install age, ssh-keygen and the PostgreSQL 17 client
+        run: |
+          apt-get update -qq && apt-get install -y -qq age openssh-client curl ca-certificates || exit 0
+          install -d /usr/share/postgresql-common/pgdg
+          curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc || exit 0
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt noble-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+          apt-get update -qq && apt-get install -y -qq postgresql-client-17 || true
       - run: uv sync --frozen
       - run: uv run ruff check .
       - run: uv run ruff format --check .

@@ -1,5 +1,6 @@
 """A linha de comandos dos livros e das licenças, e a recusa das exportações de vetores."""
 
+import re
 from collections.abc import Iterator
 from pathlib import Path
 
@@ -65,7 +66,8 @@ def env(
 
 def run(*args: str) -> tuple[int, str]:
     result = CliRunner().invoke(cli, list(args))
-    return result.exit_code, result.output
+    # em CI o rich pinta a saída: os códigos de cor partem as opções ao meio
+    return result.exit_code, re.sub(r"\x1b\[[0-9;]*m", "", result.output)
 
 
 def test_add_exige_a_classe_e_a_licenca(env: Path) -> None:

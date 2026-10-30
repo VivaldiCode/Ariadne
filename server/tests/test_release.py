@@ -408,6 +408,8 @@ def test_restore_sh_verifica_a_assinatura_desencripta_e_carrega_so_dados(
     tmp_path: Path,
     make_database: Callable[[], str],
 ) -> None:
+    if shutil.which("psql") is None:
+        pytest.skip("psql is not installed")
     built = build_release(services)
     target = make_database()
     env, database = pg_env(target)

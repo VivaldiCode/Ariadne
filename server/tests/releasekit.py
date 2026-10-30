@@ -35,6 +35,8 @@ USER_NAME = "utilizador-nunca-na-release"
 def age_keypair(folder: Path, name: str = "privada.txt") -> tuple[str, Path]:
     """Um par age de teste, FORA do repositório; a privada só aqui, nunca no sistema que cifra."""
     folder.mkdir(parents=True, exist_ok=True)
+    if shutil.which("age-keygen") is None:
+        pytest.skip("precisa do binário age-keygen")
     out = subprocess.run(["age-keygen"], capture_output=True, text=True, check=True)
     public = re.search(r"(age1[a-z0-9]+)", out.stderr + out.stdout)
     assert public

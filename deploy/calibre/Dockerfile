@@ -38,7 +38,7 @@ ENV PATH="/opt/calibre:$PATH" \
 
 COPY agent.py /opt/ariadne-calibre/agent.py
 
-RUN useradd --system --uid 1000 --home-dir /tmp/calibre-home calibre \
+RUN useradd --uid 1000 --home-dir /tmp/calibre-home calibre \
  && mkdir -p /library && chown calibre /library
 USER calibre
 WORKDIR /library

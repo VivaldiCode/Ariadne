@@ -28,9 +28,21 @@ from ariadne.release import runs
 from tests.coursefactory import make_course
 
 pytestmark = pytest.mark.db
+
+
+def _pg_dump_major() -> int:
+    """Versão maior do `pg_dump` instalado (0 se não existir); os testes usam o Postgres 17."""
+    if shutil.which("pg_dump") is None:
+        return 0
+    done = subprocess.run(["pg_dump", "--version"], capture_output=True, text=True, check=False)
+    out = done.stdout
+    digits = out.split()[-1].split(".")[0] if out.split() else ""
+    return int(digits) if digits.isdigit() else 0
+
+
 needs_pg_dump = pytest.mark.skipif(
-    shutil.which("pg_dump") is None or shutil.which("pg_restore") is None,
-    reason="precisa do pg_dump/pg_restore",
+    _pg_dump_major() < 17 or shutil.which("pg_restore") is None,
+    reason="precisa do pg_dump/pg_restore 17 (o pg_dump recusa servidores mais novos)",
 )
 needs_age = pytest.mark.skipif(shutil.which("age") is None, reason="precisa do binário age")
 

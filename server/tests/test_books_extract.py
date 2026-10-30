@@ -363,7 +363,7 @@ def test_extracao_isolada_tem_limite_de_memoria(
     path = make_epub(tmp_path / "livro.epub", CHAPTERS)
     monkeypatch.setattr(extract, "EXTRACT_MEMORY_MB", 40)
 
-    with pytest.raises(BookError, match="excedeu os limites"):
+    with pytest.raises(BookError, match="exceeded the limits"):
         extract.extract_book_isolated(path)
 
 

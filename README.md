@@ -11,7 +11,6 @@
 
 <p align="center">
   <a href="LICENSE"><img alt="License: AGPL-3.0" src="https://img.shields.io/badge/license-AGPL--3.0-blue.svg"></a>
-  <a href="https://github.com/VivaldiCode/Ariadne/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/VivaldiCode/Ariadne/actions/workflows/ci.yml/badge.svg"></a>
   <img alt="Python 3.12" src="https://img.shields.io/badge/python-3.12-3776ab.svg">
   <img alt="CPU only, no AVX required" src="https://img.shields.io/badge/runs%20on-CPU%20only%20%C2%B7%20no%20AVX-informational.svg">
   <img alt="MCP server" src="https://img.shields.io/badge/MCP-Streamable%20HTTP-8a2be2.svg">
@@ -51,16 +50,31 @@ You need Docker with Compose v2 (≥ 2.20), about 8 GB of RAM and 20 GB of disk 
 
 ```bash
 git clone https://github.com/VivaldiCode/Ariadne.git ariadne && cd ariadne
-deploy/standalone/init-env.sh && docker compose up -d --build
-docker compose logs bootstrap        # your admin API key is printed here, once
+deploy/standalone/init-env.sh              # creates .env with generated secrets (it prints none of them)
+deploy/kiwix/get-test-zim.sh               # a 1.8 MB test library in ./data/zim (Kiwix needs at least one .zim)
+docker compose up -d --build               # first start: plan for 20 minutes or more (see below)
+docker compose logs bootstrap              # your admin API key is printed here, once
 ```
 
 Then open **http://localhost:8800** and sign in with that key. The MCP endpoint is `/mcp`, the REST API is documented at
-`/docs`, and `curl localhost:8800/health` should report every check as `ok`.
+`/docs`, and `curl localhost:8800/health` should answer with `"status":"ok"` (it also lists each service; those you have
+not switched on say `not configured`).
 
-The first start is slow (it builds `kiwix-serve` and `llama.cpp`, installs Moodle and downloads the models). To try things
-with almost no download, fetch a 1.8 MB test archive first: `deploy/kiwix/get-test-zim.sh`. Real libraries can be added from
-the web app (*Sources and catalog* → Kiwix catalog) or by dropping `.zim` files in `./data/zim`.
+**How long the first start takes.** The images are built on your machine: `kiwix-serve` and `llama.cpp` are compiled, Moodle
+is installed and the models are downloaded (the embedder is ~470 MB, the curator ~2.5 GB). We measured **18 minutes with a warm
+build cache**; a cold machine takes longer. After that, `docker compose up -d` is a matter of seconds. Prebuilt images are not published yet, so building on your machine
+is the supported path for now (everything is built without AVX). If you keep the images in a registry of your own, see
+`ARIADNE_IMAGE_PREFIX` and `ARIADNE_TAG` in `.env.example`.
+
+Real libraries can be added from the web app (*Sources and catalog* → Kiwix catalog) or by dropping `.zim` files in
+`./data/zim`.
+
+**Ports.** Everything is published on `localhost` only, on these ports: the app and MCP on 8800, Kiwix 8801, Wiki.js 8802,
+Moodle 8805 and Kavita 8806. To change them, set `ARIADNE_PORT`, `KIWIX_PORT`, `WIKIJS_PORT`, `MOODLE_PORT` or `KAVITA_PORT`
+in `.env` (the commented lines in `.env.example` list them all) and run `docker compose up -d` again. Postgres, Calibre, Jobe,
+LibreTranslate and the curator are not published; to reach them for tests, add
+`COMPOSE_FILE=docker-compose.yml:deploy/standalone/ports.yml` to `.env` (same `PUBLISH_ADDRESS`, ports in `ports.yml`).
+`PUBLISH_ADDRESS` is the loopback address on this machine, filled in by `init-env.sh`; leave it alone.
 
 Profiles, what `bootstrap` does for you, upgrades and known issues: [`docs/STANDALONE.md`](docs/STANDALONE.md).
 
@@ -156,7 +170,35 @@ docker compose exec server ariadne principal create --kind agent --name claude-c
 claude mcp add --transport http ariadne http://localhost:8800/mcp --header "Authorization: Bearer <key>"
 ```
 
-Clients that only speak stdio (Claude Desktop, for example) can run `ariadne mcp-stdio` with the key in `ARIADNE_API_KEY`.
+Clients that only speak stdio (Claude Desktop, for example) run `ariadne mcp-stdio` **inside the server container**, with the key
+in `ARIADNE_API_KEY`:
+
+```json
+{
+  "mcpServers": {
+    "ariadne": {
+      "command": "docker",
+      "args": ["compose", "-f", "/path/to/ariadne/docker-compose.yml", "exec", "-T", "-e", "ARIADNE_API_KEY=<key>", "server", "ariadne", "mcp-stdio"]
+    }
+  }
+}
+```
+
+**A first search without any MCP client** (this is what the clients do under the hood):
+
+```bash
+KEY=<the key printed by the command above>
+H=(-H "Authorization: Bearer $KEY" -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream')
+SID=$(curl -si localhost:8800/mcp "${H[@]}" -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"curl","version":"0"}}}' \
+  | awk -F': ' 'tolower($1)=="mcp-session-id"{print $2}' | tr -d '\r')
+curl -s localhost:8800/mcp "${H[@]}" -H "Mcp-Session-Id: $SID" -d '{"jsonrpc":"2.0","method":"notifications/initialized"}' > /dev/null
+curl -s localhost:8800/mcp "${H[@]}" -H "Mcp-Session-Id: $SID" \
+  -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"search","arguments":{"query":"Ray Charles","k":3}}}'
+```
+
+With the test library from step 2 you should get a JSON answer whose `result` holds the matching articles (title, snippet,
+source and `document_id`). If the answer says `There are no sources: the ZIM folder is empty`, the test library is missing:
+run `deploy/kiwix/get-test-zim.sh` and `docker compose restart server`.
 
 | Tool | What it does |
 |---|---|

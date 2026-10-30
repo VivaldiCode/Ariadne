@@ -1,135 +1,135 @@
-# Ariadne standalone: a stack completa numa só máquina (docs/STANDALONE.md).
+# Ariadne standalone: the full stack on a single machine (docs/STANDALONE.md).
 #
-# Uso:  deploy/standalone/init-env.sh        # cria o .env com segredos aleatórios (openssl rand)
-#       docker compose up -d --build         # os perfis de COMPOSE_PROFILES (no .env; por omissão todos)
+# Usage: deploy/standalone/init-env.sh        # creates the .env with random secrets (openssl rand)
+#        docker compose up -d --build         # the profiles in COMPOSE_PROFILES (in the .env; all by default)
 #
-# Perfis (o núcleo sobe sempre: postgres, kiwix, server, worker, worker-heavy, init e bootstrap):
-#   wiki       Wiki.js (nível 2)                 books      Calibre + Kavita
+# Profiles (the core always starts: postgres, kiwix, server, worker, worker-heavy, init and bootstrap):
+#   wiki       Wiki.js (level 2)                 books      Calibre + Kavita
 #   courses    Moodle + CodeRunner + Jobe        translate  LibreTranslate
-#   llm        o curador (llama-server em CPU)   all        todos os de cima
-# Um perfil desligado: põe o URL do serviço vazio no .env (WIKIJS_URL=, MOODLE_URL=, …), ver .env.example.
+#   llm        the curator (llama-server on CPU) all        all of the above
+# A profile that is off: set the service URL to empty in the .env (WIKIJS_URL=, MOODLE_URL=, …), see .env.example.
 #
-# Tudo corre só em CPU e sem AVX (ARCHITECTURE.md, secção 9). As imagens de terceiros são públicas e fixadas; as do
-# Ariadne (server, kiwix, curator, jobe, moodle, calibre) constroem-se daqui por omissão, ou vêm de um registo público:
-# ARIADNE_IMAGE_PREFIX=<registo>/<dono>/ariadne-  ARIADNE_TAG=<versão>, e `docker compose pull` antes do `up` (sem --build).
+# Everything runs on CPU only and without AVX (ARCHITECTURE.md, section 9). Third-party images are public and pinned; the
+# Ariadne ones (server, kiwix, curator, jobe, moodle, calibre) are built from here by default, or come from a public registry:
+# ARIADNE_IMAGE_PREFIX=<registry>/<owner>/ariadne-  ARIADNE_TAG=<version>, and `docker compose pull` before `up` (without --build).
 name: ariadne
 
 x-server-env: &server-env
   DATABASE_URL: postgresql+psycopg://ariadne:${POSTGRES_PASSWORD}@postgres/ariadne
-  ARIADNE_MASTER_KEY: ${ARIADNE_MASTER_KEY:-}   # cofre das integrações (o init-env.sh gera-a); vazio = só o ambiente
+  ARIADNE_MASTER_KEY: ${ARIADNE_MASTER_KEY:-}   # integrations vault (init-env.sh generates it); empty = environment only
   KIWIX_URL: ${KIWIX_URL:-http://kiwix:8080}
-  KIWIX_PUBLIC_URL: ${KIWIX_PUBLIC_URL:-http://localhost:${KIWIX_PORT:-8801}}   # nas respostas
-  KIWIX_SEARCH_BATCH: ${KIWIX_SEARCH_BATCH:-100}   # livros por pedido de pesquisa (URLs compridos dão erro)
-  # Os serviços dos perfis opcionais: por omissão os deste compose. Um perfil desligado? Põe o URL vazio no .env
-  # (WIKIJS_URL=), e o Ariadne trata o serviço como «não configurado»; ou aponta-o para um serviço que já tenhas.
+  KIWIX_PUBLIC_URL: ${KIWIX_PUBLIC_URL:-http://localhost:${KIWIX_PORT:-8801}}   # in the responses
+  KIWIX_SEARCH_BATCH: ${KIWIX_SEARCH_BATCH:-100}   # books per search request (long URLs fail)
+  # The services of the optional profiles: by default the ones in this compose. A profile that is off? Set the URL to empty in the .env
+  # (WIKIJS_URL=), and Ariadne treats the service as "not configured"; or point it at a service you already have.
   WIKIJS_URL: ${WIKIJS_URL-http://wikijs:3000}
   WIKIJS_TOKEN: ${WIKIJS_TOKEN:-}
-  WIKIJS_PUBLIC_URL: ${WIKIJS_PUBLIC_URL:-http://localhost:${WIKIJS_PORT:-8802}}   # nas respostas
-  WIKIJS_LOCALES: ${WIKIJS_LOCALES:-}   # vazio: o importador pergunta ao Wiki.js (namespacing; o bootstrap liga en,pt)
-  IMPORT_HEAT_THRESHOLD: ${IMPORT_HEAT_THRESHOLD:-3}   # calor a partir do qual um documento vai para o Wiki.js
-  # Curador: LLM compatível com a OpenAI. Por omissão o `curator` do perfil `llm` (CPU); vazio = sem curador; ou o
-  # endereço de um llama-server/Ollama com GPU noutra máquina. Fora do compose, acrescenta o host a PRIVATE_ALLOWED_HOSTS.
+  WIKIJS_PUBLIC_URL: ${WIKIJS_PUBLIC_URL:-http://localhost:${WIKIJS_PORT:-8802}}   # in the responses
+  WIKIJS_LOCALES: ${WIKIJS_LOCALES:-}   # empty: the importer asks Wiki.js (namespacing; bootstrap enables en,pt)
+  IMPORT_HEAT_THRESHOLD: ${IMPORT_HEAT_THRESHOLD:-3}   # heat above which a document goes to Wiki.js
+  # Curator: OpenAI-compatible LLM. By default the `curator` of the `llm` profile (CPU); empty = no curator; or the
+  # address of a llama-server/Ollama with a GPU on another machine. Outside compose, add the host to PRIVATE_ALLOWED_HOSTS.
   CURATOR_URL: ${CURATOR_URL-http://curator:8085}
-  CURATOR_MODEL: ${CURATOR_MODEL:-gemma-3-4b-it}  # o alias de deploy/curator/model.lock
+  CURATOR_MODEL: ${CURATOR_MODEL:-gemma-3-4b-it}  # the alias from deploy/curator/model.lock
   CURATOR_API_KEY: ${CURATOR_API_KEY:-}
-  CURATOR_LABEL: ${CURATOR_LABEL:-Curador local (CPU)}   # o nome no painel Curadoria
-  CURATOR_TIMEOUT_SECONDS: ${CURATOR_TIMEOUT_SECONDS:-1800}   # em CPU uma reescrita demora
-  CURATION_MAX_CHARS: ${CURATION_MAX_CHARS:-12000}   # partes mais pequenas cabem no contexto do curador em CPU
-  # Destinos de computação (painel Curadoria): o lote em GPU gratuita do Kaggle (precisa de internet). As credenciais
-  # vão para o cofre (dashboard → Integrações) ou para aqui; sem elas o destino fica «em falta». O Colab é manual.
+  CURATOR_LABEL: ${CURATOR_LABEL:-Curador local (CPU)}   # the name in the Curation panel
+  CURATOR_TIMEOUT_SECONDS: ${CURATOR_TIMEOUT_SECONDS:-1800}   # on CPU a rewrite takes a while
+  CURATION_MAX_CHARS: ${CURATION_MAX_CHARS:-12000}   # smaller chunks fit in the curator's context on CPU
+  # Compute targets (Curation panel): the batch on Kaggle's free GPU (needs internet). The credentials
+  # go to the vault (dashboard → Integrations) or here; without them the target shows as "missing". Colab is manual.
   KAGGLE_USERNAME: ${KAGGLE_USERNAME:-}
   KAGGLE_API_TOKEN: ${KAGGLE_API_TOKEN:-}
   KAGGLE_KEY: ${KAGGLE_KEY:-}
   KAGGLE_MODEL: ${KAGGLE_MODEL:-solidrust/Mistral-7B-Instruct-v0.3-AWQ}
   KAGGLE_WEEKLY_GPU_HOURS: ${KAGGLE_WEEKLY_GPU_HOURS:-30}
-  BATCH_AUTO_PUBLISH: ${BATCH_AUTO_PUBLISH:-false}   # false: o que o curador reescreve (local ou GPU externa) espera a tua validação
-  # O túnel do lote de GPU (perfil `tunel`, serviço gpu-gateway): sem GPU_GATEWAY_PUBLIC_URL fica desligado e o
-  # lote corre só por ficheiros. O service token do Cloudflare Access é opcional (segunda camada na borda).
+  BATCH_AUTO_PUBLISH: ${BATCH_AUTO_PUBLISH:-false}   # false: what the curator rewrites (local or external GPU) waits for your validation
+  # The GPU batch tunnel (`tunel` profile, gpu-gateway service): without GPU_GATEWAY_PUBLIC_URL it stays off and the
+  # batch runs through files only. The Cloudflare Access service token is optional (second layer at the edge).
   GPU_GATEWAY_PUBLIC_URL: ${GPU_GATEWAY_PUBLIC_URL:-}
   GPU_GATEWAY_ACCESS_ID: ${GPU_GATEWAY_ACCESS_ID:-}
   GPU_GATEWAY_ACCESS_SECRET: ${GPU_GATEWAY_ACCESS_SECRET:-}
-  CURATION_SAMPLE_RATE: ${CURATION_SAMPLE_RATE:-0}   # fração dos artigos sem flags que o curador vê
+  CURATION_SAMPLE_RATE: ${CURATION_SAMPLE_RATE:-0}   # fraction of the articles without flags that the curator sees
   ZIM_DIR: /zim
-  ZIM_MAX_OPEN: ${ZIM_MAX_OPEN:-64}                # ZIM abertos ao mesmo tempo (descritores de ficheiro)
+  ZIM_MAX_OPEN: ${ZIM_MAX_OPEN:-64}                # ZIMs open at the same time (file descriptors)
   EMBEDDER: ${EMBEDDER:-onnx}          # onnx | llamacpp | http
   EMBEDDER_MODEL: intfloat/multilingual-e5-small
   EMBEDDER_REVISION: ${EMBEDDER_REVISION:-614241f622f53c4eeff9890bdc4f31cfecc418b3}
-  EMBEDDER_VARIANT: ${EMBEDDER_VARIANT:-fp32}    # fp32 | int8 (vetores diferentes: outro model_id)
-  EMBEDDER_THREADS: ${EMBEDDER_THREADS:-0}       # 0 = omissão do onnxruntime
-  EMBEDDER_URL: ${EMBEDDER_URL:-}                # só com EMBEDDER=llamacpp|http
-  EMBEDDER_MODEL_ID: ${EMBEDDER_MODEL_ID:-}      # idem: o model_id dos vetores
-  MODELS_DIR: /models                  # o modelo ONNX descarrega-se aqui na 1.ª utilização
-  INDEX_DAILY_BUDGET: ${INDEX_DAILY_BUDGET:-20000}   # chunks vetorizados por dia
+  EMBEDDER_VARIANT: ${EMBEDDER_VARIANT:-fp32}    # fp32 | int8 (different vectors: another model_id)
+  EMBEDDER_THREADS: ${EMBEDDER_THREADS:-0}       # 0 = onnxruntime default
+  EMBEDDER_URL: ${EMBEDDER_URL:-}                # only with EMBEDDER=llamacpp|http
+  EMBEDDER_MODEL_ID: ${EMBEDDER_MODEL_ID:-}      # likewise: the model_id of the vectors
+  MODELS_DIR: /models                  # the ONNX model is downloaded here on first use
+  INDEX_DAILY_BUDGET: ${INDEX_DAILY_BUDGET:-20000}   # chunks vectorized per day
   CHUNK_WORDS: ${CHUNK_WORDS:-180}
   HEAT_HALF_LIFE_DAYS: ${HEAT_HALF_LIFE_DAYS:-30}
-  NEIGHBORS_HEAT_THRESHOLD: ${NEIGHBORS_HEAT_THRESHOLD:-5}   # calor que dispara a expansão de vizinhos
-  NEIGHBORS_MAX_PER_DOC: ${NEIGHBORS_MAX_PER_DOC:-50}        # vizinhos novos por expansão
-  LINK_TAU: ${LINK_TAU:-0.88}                    # cosseno a partir do qual uma ligação vetorial é proposta
-  LINK_TAU_ACCEPT: ${LINK_TAU_ACCEPT:-0.94}      # e a partir do qual fica logo aceite
+  NEIGHBORS_HEAT_THRESHOLD: ${NEIGHBORS_HEAT_THRESHOLD:-5}   # heat that triggers neighbor expansion
+  NEIGHBORS_MAX_PER_DOC: ${NEIGHBORS_MAX_PER_DOC:-50}        # new neighbors per expansion
+  LINK_TAU: ${LINK_TAU:-0.88}                    # cosine above which a vector link is proposed
+  LINK_TAU_ACCEPT: ${LINK_TAU_ACCEPT:-0.94}      # and above which it is accepted right away
   ROUTER_TAU_HIGH: ${ROUTER_TAU_HIGH:-0.86}
   ROUTER_TAU_LOW: ${ROUTER_TAU_LOW:-0.80}
-  ROUTER_HISTORICAL_RULE: ${ROUTER_HISTORICAL_RULE:-true}   # em história, a versão na língua original entra com o selo
-  ROUTER_ROOM_BONUS: ${ROUTER_ROOM_BONUS:-0.002}   # bónus de fusão aos resultados das salas mais perto da pergunta
+  ROUTER_HISTORICAL_RULE: ${ROUTER_HISTORICAL_RULE:-true}   # in history, the original-language version is included with the seal
+  ROUTER_ROOM_BONUS: ${ROUTER_ROOM_BONUS:-0.002}   # fusion bonus for the results of the rooms closest to the question
   ROUTER_ROOMS_TOP: ${ROUTER_ROOMS_TOP:-3}
-  # Salas (ARCHITECTURE.md, 4.5): temas dentro de cada ala, calculados dos vetores de artigo
-  ROOMS_MIN: ${ROOMS_MIN:-8}                     # nº de salas: ~√(n/2), entre ROOMS_MIN e ROOMS_MAX
+  # Rooms (ARCHITECTURE.md, 4.5): topics inside each wing, computed from the article vectors
+  ROOMS_MIN: ${ROOMS_MIN:-8}                     # number of rooms: ~√(n/2), between ROOMS_MIN and ROOMS_MAX
   ROOMS_MAX: ${ROOMS_MAX:-200}
-  ROOMS_MIN_DOCUMENTS: ${ROOMS_MIN_DOCUMENTS:-16}   # uma ala com menos artigos com vetor fica sem salas
-  ROOMS_GROWTH: ${ROOMS_GROWTH:-0.25}            # as salas de uma ala recalculam-se quando ela cresce esta fração
-  ROOMS_TRAIN_SAMPLE: ${ROOMS_TRAIN_SAMPLE:-100000}   # vetores usados no k-means (os outros só se atribuem)
+  ROOMS_MIN_DOCUMENTS: ${ROOMS_MIN_DOCUMENTS:-16}   # a wing with fewer articles that have a vector gets no rooms
+  ROOMS_GROWTH: ${ROOMS_GROWTH:-0.25}            # a wing's rooms are recomputed when it grows by this fraction
+  ROOMS_TRAIN_SAMPLE: ${ROOMS_TRAIN_SAMPLE:-100000}   # vectors used in k-means (the others are only assigned)
   ROOMS_SEED: ${ROOMS_SEED:-9}
-  ROOMS_MATCH_SIMILARITY: ${ROOMS_MATCH_SIMILARITY:-0.7}   # a sala nova herda o id da antiga a partir deste cosseno (centrado)
-  ROOMS_MODEL_SWITCH_COVERAGE: ${ROOMS_MODEL_SWITCH_COVERAGE:-0.9}   # modelo novo: só troca as salas com esta cobertura da ala
+  ROOMS_MATCH_SIMILARITY: ${ROOMS_MATCH_SIMILARITY:-0.7}   # the new room inherits the old one's id above this cosine (centered)
+  ROOMS_MODEL_SWITCH_COVERAGE: ${ROOMS_MODEL_SWITCH_COVERAGE:-0.9}   # new model: only replaces the rooms at this wing coverage
   ROOMS_ASSIGN_BATCH: ${ROOMS_ASSIGN_BATCH:-5000}
   ROOMS_INTERVAL_SECONDS: ${ROOMS_INTERVAL_SECONDS:-600}
-  # Armazenamento do nível 3: pgvector | mempalace (precisa do extra ariadne[mempalace], que a imagem não traz;
-  # sem ele, ou sem MEMPALACE_DSN, arranca com o pgvector e o /health diz porquê)
+  # Level 3 storage: pgvector | mempalace (needs the ariadne[mempalace] extra, which the image does not include;
+  # without it, or without MEMPALACE_DSN, it starts with pgvector and /health says why)
   SEMANTIC_STORE: ${SEMANTIC_STORE:-pgvector}
-  MEMPALACE_DSN: ${MEMPALACE_DSN:-}              # Postgres do espelho: de preferência uma base própria
+  MEMPALACE_DSN: ${MEMPALACE_DSN:-}              # mirror Postgres: preferably a database of its own
   MEMPALACE_PALACE_DIR: ${MEMPALACE_PALACE_DIR:-/models/mempalace}
   MEMPALACE_INTERVAL_SECONDS: ${MEMPALACE_INTERVAL_SECONDS:-900}
-  # Tradução (STRUCTURE.md, secção 9). Vazio = desligada. Só um serviço LOCAL: o texto vai para lá. O LibreTranslate deste
-  # compose (perfil `translate`, o valor por omissão)
+  # Translation (STRUCTURE.md, section 9). Empty = off. A LOCAL service only: the text goes there. The LibreTranslate in this
+  # compose (`translate` profile, the default value)
   LIBRETRANSLATE_URL: ${LIBRETRANSLATE_URL-http://libretranslate:5000}
   LIBRETRANSLATE_API_KEY: ${LIBRETRANSLATE_API_KEY:-}
-  LIBRETRANSLATE_PT_CODE: ${LIBRETRANSLATE_PT_CODE:-pt}   # pt-PT se o servidor tiver um modelo próprio
-  TRANSLATE_QUERIES: ${TRANSLATE_QUERIES:-true}           # a pergunta PT⇄EN também se pesquisa na outra língua
-  TRANSLATE_PROTECTED_TERMS: ${TRANSLATE_PROTECTED_TERMS:-}   # vazio = a lista de omissão
+  LIBRETRANSLATE_PT_CODE: ${LIBRETRANSLATE_PT_CODE:-pt}   # pt-PT if the server has a model of its own
+  TRANSLATE_QUERIES: ${TRANSLATE_QUERIES:-true}           # a PT⇄EN question is also searched in the other language
+  TRANSLATE_PROTECTED_TERMS: ${TRANSLATE_PROTECTED_TERMS:-}   # empty = the default list
   TRANSLATE_CONCURRENCY: ${TRANSLATE_CONCURRENCY:-4}
   TRANSLATE_CACHE_TTL_DAYS: ${TRANSLATE_CACHE_TTL_DAYS:-90}
   TRANSLATE_CACHE_MAX_ROWS: ${TRANSLATE_CACHE_MAX_ROWS:-100000}
-  # Cursos (STRUCTURE.md, 6.2): formato canónico num repositório Git próprio (volume), Moodle + CodeRunner e Jobe
+  # Courses (STRUCTURE.md, 6.2): canonical format in a Git repository of its own (volume), Moodle + CodeRunner and Jobe
   COURSES_REPO: /courses
-  SOURCE_CLASS_OVERRIDES: ${SOURCE_CLASS_OVERRIDES:-}   # 'zim:x=book,zim:y=course': corrige a classificação à entrada
-  JOBE_URL: ${JOBE_URL-http://jobe-gateway}             # sandbox de código (nunca o código corre no server)
+  SOURCE_CLASS_OVERRIDES: ${SOURCE_CLASS_OVERRIDES:-}   # 'zim:x=book,zim:y=course': corrects the classification on ingestion
+  JOBE_URL: ${JOBE_URL-http://jobe-gateway}             # code sandbox (code never runs on the server)
   JOBE_API_KEY: ${JOBE_API_KEY:-}
   MOODLE_URL: ${MOODLE_URL-http://moodle}
-  MOODLE_PUBLIC_URL: ${MOODLE_PUBLIC_URL:-http://localhost:${MOODLE_PORT:-8805}}   # nas respostas e na app
-  MOODLE_TOKEN: ${MOODLE_TOKEN:-}                       # o `bootstrap` guarda-o no cofre
-  # Livros (STRUCTURE.md, 6.3): a biblioteca do Calibre (volume partilhado, aqui só de leitura), o agente do Calibre e o Kavita
-  PRIVATE_ALLOWED_HOSTS: ${PRIVATE_ALLOWED_HOSTS:-}      # hosts que podem receber texto da classe privado (vazio = serviços do compose e localhost)
+  MOODLE_PUBLIC_URL: ${MOODLE_PUBLIC_URL:-http://localhost:${MOODLE_PORT:-8805}}   # in the responses and in the app
+  MOODLE_TOKEN: ${MOODLE_TOKEN:-}                       # `bootstrap` stores it in the vault
+  # Books (STRUCTURE.md, 6.3): the Calibre library (shared volume, read-only here), the Calibre agent and Kavita
+  PRIVATE_ALLOWED_HOSTS: ${PRIVATE_ALLOWED_HOSTS:-}      # hosts that may receive text of the private class (empty = compose services and localhost)
   BOOKS_DIR: /books
-  BOOKS_MAX_BYTES: ${BOOKS_MAX_BYTES:-314572800}        # `books add` recusa ficheiros maiores (300 MiB)
+  BOOKS_MAX_BYTES: ${BOOKS_MAX_BYTES:-314572800}        # `books add` refuses larger files (300 MiB)
   CALIBRE_URL: ${CALIBRE_URL-http://calibre:8080}
   CALIBRE_API_KEY: ${CALIBRE_API_KEY:-}
   KAVITA_URL: ${KAVITA_URL-http://kavita:5000}
-  KAVITA_API_KEY: ${KAVITA_API_KEY:-}                   # o `bootstrap` guarda-a no cofre
+  KAVITA_API_KEY: ${KAVITA_API_KEY:-}                   # `bootstrap` stores it in the vault
   KAVITA_LIBRARY_ID: ${KAVITA_LIBRARY_ID:-0}
-  KAVITA_PUBLIC_URL: ${KAVITA_PUBLIC_URL:-http://localhost:${KAVITA_PORT:-8806}}   # nas respostas e na app
-  # Catálogo do Kiwix (Fase 12): o dashboard descarrega ZIM para ZIM_DIR (o worker `catalog`)
+  KAVITA_PUBLIC_URL: ${KAVITA_PUBLIC_URL:-http://localhost:${KAVITA_PORT:-8806}}   # in the responses and in the app
+  # Kiwix catalog (Phase 12): the dashboard downloads ZIM files into ZIM_DIR (the `catalog` worker)
   KIWIX_CATALOG_URL: ${KIWIX_CATALOG_URL:-https://library.kiwix.org/catalog/v2/entries}
-  # Backups e releases (Fase 12): pg_dump local em BACKUP_DIR; release externa semanal cifrada com age (DESLIGADA por omissão)
+  # Backups and releases (Phase 12): local pg_dump in BACKUP_DIR; weekly external release encrypted with age (OFF by default)
   BACKUP_DIR: /backups
   BACKUP_KEEP: ${BACKUP_KEEP:-4}
-  RELEASE_ENABLED: ${RELEASE_ENABLED:-false}              # liga a publicação no GitHub e o agendamento semanal
-  RELEASE_AGE_RECIPIENT: ${RELEASE_AGE_RECIPIENT:-}       # chave PÚBLICA age1… (a privada nunca entra aqui)
-  RELEASE_PART_BYTES: ${RELEASE_PART_BYTES:-2000000000}   # no máximo 2 GB por parte
+  RELEASE_ENABLED: ${RELEASE_ENABLED:-false}              # enables publishing to GitHub and the weekly schedule
+  RELEASE_AGE_RECIPIENT: ${RELEASE_AGE_RECIPIENT:-}       # PUBLIC key age1… (the private one never goes here)
+  RELEASE_PART_BYTES: ${RELEASE_PART_BYTES:-2000000000}   # at most 2 GB per part
   RELEASE_INTERVAL_DAYS: ${RELEASE_INTERVAL_DAYS:-7}
   RELEASE_RETENTION: ${RELEASE_RETENTION:-8}
-  RELEASE_REHEARSAL_DAYS: ${RELEASE_REHEARSAL_DAYS:-90}   # o ensaio de restauro está em atraso passado isto
-  RELEASE_SIGNING_KEY_FILE: /run/ariadne/release_signing_key   # a chave privada de ASSINATURA (montada só de leitura, abaixo)
-  RELEASE_SIGNING_PUBKEY: ${RELEASE_SIGNING_PUBKEY:-}     # «ssh-ed25519 AAAA…»: a pública, fixada também fora do GitHub
-  RELEASE_GITHUB_REPO: ${RELEASE_GITHUB_REPO:-}           # «dono/repositório»
+  RELEASE_REHEARSAL_DAYS: ${RELEASE_REHEARSAL_DAYS:-90}   # the restore rehearsal is overdue after this
+  RELEASE_SIGNING_KEY_FILE: /run/ariadne/release_signing_key   # the private SIGNING key (mounted read-only, below)
+  RELEASE_SIGNING_PUBKEY: ${RELEASE_SIGNING_PUBKEY:-}     # "ssh-ed25519 AAAA…": the public one, also pinned outside GitHub
+  RELEASE_GITHUB_REPO: ${RELEASE_GITHUB_REPO:-}           # "owner/repository"
   RELEASE_GITHUB_TOKEN: ${RELEASE_GITHUB_TOKEN:-}
 
 
@@ -141,27 +141,27 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env (deploy/standalone/init-env.sh)}
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./deploy/postgres/init:/docker-entrypoint-initdb.d:ro   # cria as bases ariadne, wikijs e moodle
-    shm_size: ${POSTGRES_SHM_SIZE:-1g}                         # builds HNSW paralelos (maintenance_work_mem)
-    # Sem porta publicada: só a rede interna. Para testes e manutenção, deploy/standalone/ports.yml.
+      - ./deploy/postgres/init:/docker-entrypoint-initdb.d:ro   # creates the ariadne, wikijs and moodle databases
+    shm_size: ${POSTGRES_SHM_SIZE:-1g}                         # parallel HNSW builds (maintenance_work_mem)
+    # No published port: internal network only. For tests and maintenance, deploy/standalone/ports.yml.
     depends_on:
-      init: { condition: service_completed_successfully }      # nunca arranca com um segredo por gerar
+      init: { condition: service_completed_successfully }      # never starts with a secret still to be generated
     healthcheck:
-      # Por TCP: na 1.ª inicialização o socket unix responde antes de o servidor aceitar ligações.
+      # Over TCP: on first initialization the unix socket answers before the server accepts connections.
       test: ["CMD-SHELL", "pg_isready -h localhost -U ariadne -d ariadne"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 120s                        # a 1.ª inicialização (initdb + bases) numa máquina ocupada
-    stop_grace_period: 60s                                     # checkpoint de paragem sem recuperação no arranque
+      start_period: 120s                        # the first initialization (initdb + databases) on a busy machine
+    stop_grace_period: 60s                                     # shutdown checkpoint, so no recovery is needed at startup
     restart: unless-stopped
 
-  # O primeiro passo de tudo. Recusa arrancar se algum segredo ainda for o placeholder do .env.example («change-me»:
-  # corre deploy/standalone/init-env.sh, que os gera), e todos os serviços com segredos esperam por ele. Depois acerta o
-  # dono das pastas de dados (ZIM_DIR, BOOKS_DIR, COURSES_DIR, BACKUP_DIR) para o utilizador 1000, o do
-  # server, dos workers e do Calibre. Num Linux, o Docker cria as pastas de um bind como root e os contentores, que
-  # não correm como root, não as podiam escrever. Só muda a pasta de cima (nunca os ficheiros lá dentro) e só se
-  # ainda não for do 1000.
+  # The first step of everything. It refuses to start if any secret is still the .env.example placeholder (`change-me`:
+  # run deploy/standalone/init-env.sh, which generates them), and all services with secrets wait for it. Then it sets the
+  # owner of the data folders (ZIM_DIR, BOOKS_DIR, COURSES_DIR, BACKUP_DIR) to user 1000, the one of the
+  # server, the workers and Calibre. On Linux, Docker creates bind-mount folders as root and the containers, which
+  # do not run as root, could not write to them. It only changes the top folder (never the files inside) and only if
+  # it is not already owned by 1000.
   init:
     build: &server-build
       context: .
@@ -174,7 +174,7 @@ services:
         bad=""
         for v in $$SECRET_NAMES; do [ "$$(printenv "$$v")" = change-me ] && bad="$$bad $$v"; done
         if [ -n "$$bad" ]; then
-          echo "Segredos ainda com o placeholder do .env.example:$$bad. Corre deploy/standalone/init-env.sh." >&2
+          echo "Secrets still holding the .env.example placeholder:$$bad. Run deploy/standalone/init-env.sh." >&2
           exit 1
         fi
         for d in /zim /books /courses /backups; do [ "$$(stat -c %u $$d)" = 1000 ] || chown 1000:1000 "$$d"; done
@@ -198,13 +198,13 @@ services:
       - ${COURSES_DIR:-./data/courses}:/courses
       - ${BACKUP_DIR:-./data/backups}:/backups
     healthcheck:
-      disable: true                             # corre uma vez e sai
+      disable: true                             # runs once and exits
     restart: "no"
 
-  # O kiwix-serve com o skin do Ariadne (deploy/kiwix: o mesmo design system do dashboard e do Wiki.js), sobre um
-  # library.xml (--library --monitorLibrary) que o entrypoint mantém igual à pasta de ZIM: o que o dashboard
-  # descarrega passa a ser servido sozinho (secção 4.2 do ARCHITECTURE.md). Os ZIM continuam só de leitura para o
-  # kiwix; o library.xml fica num tmpfs gravável. O 1.º build compila o libkiwix (uns minutos).
+  # kiwix-serve with the Ariadne skin (deploy/kiwix: the same design system as the dashboard and Wiki.js), on top of a
+  # library.xml (--library --monitorLibrary) that the entrypoint keeps in sync with the ZIM folder: whatever the dashboard
+  # downloads is then served on its own (section 4.2 of ARCHITECTURE.md). The ZIMs stay read-only for
+  # kiwix; library.xml lives on a writable tmpfs. The first build compiles libkiwix (a few minutes).
   kiwix:
     build:
       context: deploy
@@ -227,7 +227,7 @@ services:
     restart: unless-stopped
 
   wikijs:
-    image: ghcr.io/requarks/wiki:2.5.314      # 2.5: a 3.x continua em alpha (ARCHITECTURE.md, 4.4)
+    image: ghcr.io/requarks/wiki:2.5.314      # 2.5: 3.x is still in alpha (ARCHITECTURE.md, 4.4)
     profiles: [wiki, all]
     environment:
       DB_TYPE: postgres
@@ -236,12 +236,12 @@ services:
       DB_USER: ariadne
       DB_PASS: ${POSTGRES_PASSWORD}
       DB_NAME: wikijs
-    # Sem porta publicada: o assistente de setup de um Wiki.js novo aceita quem chegar primeiro. O `wikijs-public`
-    # (abaixo) só abre a porta depois de o `bootstrap-wiki` ter feito o setup.
+    # No published port: the setup wizard of a new Wiki.js accepts whoever gets there first. `wikijs-public`
+    # (below) only opens the port after `bootstrap-wiki` has done the setup.
     depends_on:
       postgres: { condition: service_healthy }
     healthcheck:
-      # A imagem tem node; /healthz responde 200 mesmo antes do setup (que o `bootstrap` faz).
+      # The image has node; /healthz answers 200 even before the setup (which `bootstrap` does).
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/healthz',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
       interval: 15s
       timeout: 5s
@@ -249,8 +249,8 @@ services:
       start_period: 40s
     restart: unless-stopped
 
-  # A porta do Wiki.js para fora (leitura humana; a API GraphQL é a mesma), só depois do setup. Um proxy TCP: o
-  # socat resolve o nome em cada ligação, por isso aguenta o Wiki.js ser recriado.
+  # The Wiki.js port to the outside (human reading; the GraphQL API is the same), only after the setup. A TCP proxy:
+  # socat resolves the name on each connection, so it survives Wiki.js being recreated.
   wikijs-public:
     image: alpine/socat@sha256:7f9a06753033f2b7de18edc2353f2c15153413d95a039163c6db270fc7a6c3b0   # socat 1.8.1, build 1
     profiles: [wiki, all]
@@ -260,15 +260,15 @@ services:
     depends_on:
       bootstrap-wiki: { condition: service_completed_successfully }
     healthcheck:
-      # Pelo IP do contentor: o socat escuta em IPv4 e o `localhost` daqui resolve primeiro para IPv6.
+      # By container IP: socat listens on IPv4 and `localhost` here resolves to IPv6 first.
       test: ["CMD-SHELL", "wget -q -O /dev/null \"http://$$(hostname -i | cut -d' ' -f1):3000/healthz\""]
       interval: 15s
       timeout: 5s
       retries: 5
     restart: unless-stopped
 
-  # O LibreTranslate local. Na 1.ª vez descarrega os modelos Argos das línguas em LT_LOAD_ONLY para o volume
-  # (precisa de internet só nessa altura).
+  # The local LibreTranslate. The first time it downloads the Argos models for the languages in LT_LOAD_ONLY into the volume
+  # (needs internet only then).
   libretranslate:
     image: libretranslate/libretranslate:v1.7.3
     profiles: [translate, all]
@@ -282,23 +282,23 @@ services:
       interval: 20s
       timeout: 6s
       retries: 10
-      start_period: 600s                        # a 1.ª descarga dos modelos
+      start_period: 600s                        # the first model download
     restart: unless-stopped
 
-  # O curador (STRUCTURE.md, secção 5): o llama-server do llama.cpp só em CPU (deploy/curator, compilado sem AVX),
-  # com um modelo pequeno fixado por sha256 que se descarrega para o volume na 1.ª vez (~2,5 GB). Só com chave de
-  # API (CURATOR_API_KEY). Com uma GPU noutra máquina basta apontar
-  # CURATOR_URL para lá e não subir este perfil.
+  # The curator (STRUCTURE.md, section 5): llama.cpp's llama-server on CPU only (deploy/curator, built without AVX),
+  # with a small model pinned by sha256 that is downloaded into the volume the first time (~2.5 GB). Only with an
+  # API key (CURATOR_API_KEY). With a GPU on another machine just point
+  # CURATOR_URL there and do not start this profile.
   curator:
     build:
       context: deploy/curator
     image: ${ARIADNE_IMAGE_PREFIX:-ariadne-}curator:${ARIADNE_TAG:-local}
     profiles: [llm, all]
     environment:
-      CURATOR_API_KEY: ${CURATOR_API_KEY:-}     # sem ela o entrypoint recusa-se a arrancar
-      CURATOR_THREADS: ${CURATOR_THREADS:-0}    # 0 = todos os CPUs
+      CURATOR_API_KEY: ${CURATOR_API_KEY:-}     # without it the entrypoint refuses to start
+      CURATOR_THREADS: ${CURATOR_THREADS:-0}    # 0 = all CPUs
       CURATOR_CTX: ${CURATOR_CTX:-16384}
-      CURATOR_MODEL_URL: ${CURATOR_MODEL_URL:-}  # vazio = Hugging Face; ou um espelho (o sha256 confere-o)
+      CURATOR_MODEL_URL: ${CURATOR_MODEL_URL:-}  # empty = Hugging Face; or a mirror (the sha256 still checks it)
     volumes:
       - curator-models:/models
     mem_limit: ${CURATOR_MEM_LIMIT:-6g}
@@ -306,15 +306,15 @@ services:
       init: { condition: service_completed_successfully }
     restart: unless-stopped
 
-  # Sandbox de código (STRUCTURE.md, secção 12): o Jobe corre os exercícios do CodeRunner e o código do sandbox
-  # geral. O contentor está numa rede interna (sem saída para a internet) e só se chega a ele pelo `jobe-gateway`;
-  # sistema de ficheiros só de leitura (menos /home/jobe, onde o Jobe cria as pastas de cada execução), sem
-  # privilégios além dos que o runguard precisa, e limites de processos e memória. Cada execução tem ainda os
-  # limites de tempo, memória e processos do Jobe (ver ariadne/sandbox/jobe.py).
-  # A imagem é amd64 (num Mac Apple Silicon corre emulada); a versão está fixa pelo digest.
+  # Code sandbox (STRUCTURE.md, section 12): Jobe runs the CodeRunner exercises and the code of the general
+  # sandbox. The container is on an internal network (no internet access) and is only reachable through `jobe-gateway`;
+  # read-only filesystem (except /home/jobe, where Jobe creates the folder for each run), no
+  # privileges beyond what runguard needs, and process and memory limits. Each run also has Jobe's own
+  # time, memory and process limits (see ariadne/sandbox/jobe.py).
+  # The image is amd64 (emulated on an Apple Silicon Mac); the version is pinned by digest.
   jobe:
     build:
-      context: deploy/jobe                     # a imagem oficial + iptables (cortar a rede ao código dos alunos)
+      context: deploy/jobe                     # the official image + iptables (to cut the network for the students' code)
     image: ${ARIADNE_IMAGE_PREFIX:-ariadne-}jobe:${ARIADNE_TAG:-local}
     platform: linux/amd64
     profiles: [courses, all]
@@ -329,13 +329,13 @@ services:
     volumes:
       - jobe-home:/home/jobe
     cap_drop: [ALL]
-    # NET_ADMIN só serve ao entrypoint para pôr as regras de rede dos jobeNN; o código dos alunos corre sem capacidades.
+    # NET_ADMIN is only used by the entrypoint to set the jobeNN network rules; the students' code runs without capabilities.
     cap_add: [CHOWN, DAC_OVERRIDE, FOWNER, SETUID, SETGID, KILL, NET_BIND_SERVICE, SYS_CHROOT, AUDIT_WRITE, NET_ADMIN, NET_RAW]
     pids_limit: 512
     mem_limit: 3g
     networks: [sandbox]
     healthcheck:
-      # O mesmo teste da imagem (uma execução de Python), mais amiúde do que os 60 s dela.
+      # The same test as the image (one Python run), more often than its 60 s.
       test: ["CMD-SHELL", "/usr/bin/python3 /var/www/html/jobe/minimaltest.py || exit 1"]
       interval: 15s
       timeout: 10s
@@ -343,20 +343,20 @@ services:
       start_period: 60s
     restart: unless-stopped
 
-  # Porta de entrada do Jobe: nginx com chave de API (JOBE_API_KEY), limite de pedidos por cliente e só a API REST.
-  # Está na rede `sandbox` (para falar com o Jobe) e na do compose (a do Moodle, do server e do worker): o Moodle
-  # bloqueia todas as redes privadas menos o IP dele, que resolve pelo nome em cada pedido (SSRF, deploy/moodle/config.php).
+  # Jobe's entry point: nginx with an API key (JOBE_API_KEY), per-client request limit and the REST API only.
+  # It is on the `sandbox` network (to talk to Jobe) and on the compose one (that of Moodle, the server and the worker): Moodle
+  # blocks all private networks except its IP, which it resolves by name on each request (SSRF, deploy/moodle/config.php).
   jobe-gateway:
     image: nginx:1.27.5-alpine
     profiles: [courses, all]
     environment:
-      JOBE_API_KEY: ${JOBE_API_KEY:-}                      # vazia: o gateway recusa todos os pedidos
+      JOBE_API_KEY: ${JOBE_API_KEY:-}                      # empty: the gateway refuses all requests
       JOBE_UPSTREAM: jobe:80
-      JOBE_RATE_LIMIT: ${JOBE_RATE_LIMIT:-30}              # pedidos por segundo e por cliente (IP)
+      JOBE_RATE_LIMIT: ${JOBE_RATE_LIMIT:-30}              # requests per second per client (IP)
       JOBE_RATE_BURST: ${JOBE_RATE_BURST:-60}
-      JOBE_MAX_CONNECTIONS: ${JOBE_MAX_CONNECTIONS:-16}    # ligações simultâneas por cliente
-      JOBE_ALLOW: ${JOBE_ALLOW:-all}                       # `all` ou um IP/CIDR (quem pode chamar o Jobe)
-      JOBE_ALLOW_INTERNAL: ${JOBE_ALLOW_INTERNAL:-unix:}   # além de JOBE_ALLOW (aqui já `all`); `unix:` não deixa passar ninguém
+      JOBE_MAX_CONNECTIONS: ${JOBE_MAX_CONNECTIONS:-16}    # simultaneous connections per client
+      JOBE_ALLOW: ${JOBE_ALLOW:-all}                       # `all` or an IP/CIDR (who may call Jobe)
+      JOBE_ALLOW_INTERNAL: ${JOBE_ALLOW_INTERNAL:-unix:}   # in addition to JOBE_ALLOW (already `all` here); `unix:` lets nobody through
     volumes:
       - ./deploy/jobe-gateway/default.conf.template:/etc/nginx/templates/default.conf.template:ro
       - ./deploy/jobe-gateway/15-resolver.sh:/docker-entrypoint.d/15-resolver.sh:ro
@@ -364,7 +364,7 @@ services:
       jobe: { condition: service_healthy }
       init: { condition: service_completed_successfully }
     healthcheck:
-      # Pelo IP do contentor: o nginx só escuta em IPv4 e o `localhost` daqui resolve primeiro para IPv6.
+      # By container IP: nginx only listens on IPv4 and `localhost` here resolves to IPv6 first.
       test: ["CMD-SHELL", "wget -q -O /dev/null \"http://$$(hostname -i | cut -d' ' -f1)/healthz\""]
       interval: 15s
       timeout: 4s
@@ -372,9 +372,9 @@ services:
     networks: [sandbox, default]
     restart: unless-stopped
 
-  # Cursos (STRUCTURE.md, 6.2): Moodle 4.5 LTS + CodeRunner + o plugin local_ariadne (publicação a partir do
-  # formato canónico), construído em deploy/moodle. A base `moodle` cria-se sozinha no arranque; a 1.ª vez
-  # instala o Moodle (alguns minutos, mais num Mac, onde o Jobe corre emulado). O token do serviço tira-o o `bootstrap`.
+  # Courses (STRUCTURE.md, 6.2): Moodle 4.5 LTS + CodeRunner + the local_ariadne plugin (publishing from the
+  # canonical format), built in deploy/moodle. The `moodle` database creates itself at startup; the first time
+  # it installs Moodle (a few minutes, longer on a Mac, where Jobe runs emulated). `bootstrap` obtains the service token.
   moodle:
     build:
       context: deploy/moodle
@@ -386,15 +386,15 @@ services:
       MOODLE_DB_USER: ariadne
       MOODLE_DB_PASSWORD: ${POSTGRES_PASSWORD}
       MOODLE_ADMIN_USER: admin
-      MOODLE_ADMIN_PASSWORD: ${MOODLE_ADMIN_PASSWORD:-}    # vazia: o contentor recusa-se a arrancar
+      MOODLE_ADMIN_PASSWORD: ${MOODLE_ADMIN_PASSWORD:-}    # empty: the container refuses to start
       MOODLE_WS_PASSWORD: ${MOODLE_WS_PASSWORD:-}
-      MOODLE_PUBLIC_HOST: ${MOODLE_PUBLIC_HOST:-localhost:${MOODLE_PORT:-8805}}   # host:porta do navegador
-      MOODLE_EXTRA_HOSTS: moodle                # o nome do serviço, usado pelo server/worker
+      MOODLE_PUBLIC_HOST: ${MOODLE_PUBLIC_HOST:-localhost:${MOODLE_PORT:-8805}}   # host:port as seen by the browser
+      MOODLE_EXTRA_HOSTS: moodle                # the service name, used by the server/worker
       JOBE_HOST: jobe-gateway
       JOBE_APIKEY: ${JOBE_API_KEY:-}
-      # O único IP privado que o Moodle pode chamar: vazio = o do JOBE_HOST, resolvido em cada pedido (deploy/moodle).
+      # The only private IP Moodle may call: empty = that of JOBE_HOST, resolved on each request (deploy/moodle).
       JOBE_GATEWAY_IP: ${JOBE_GATEWAY_IP:-}
-      MOODLE_TOKEN_IPS: ${MOODLE_TOKEN_IPS:-}              # restringe o token do serviço a estes IP/CIDR (vazio = sem restrição)
+      MOODLE_TOKEN_IPS: ${MOODLE_TOKEN_IPS:-}              # restricts the service token to these IPs/CIDRs (empty = no restriction)
     ports:
       - "${PUBLISH_ADDRESS:?run deploy/standalone/init-env.sh}:${MOODLE_PORT:-8805}:80"
     volumes:
@@ -402,19 +402,19 @@ services:
     depends_on:
       postgres: { condition: service_healthy }
       jobe-gateway: { condition: service_healthy }
-    # O healthcheck vem da imagem (deploy/moodle/Dockerfile: /login/index.php, com 10 min para a 1.ª instalação).
+    # The healthcheck comes from the image (deploy/moodle/Dockerfile: /login/index.php, with 10 min for the first install).
     restart: unless-stopped
 
-  # Livros (STRUCTURE.md, 6.3). O Calibre é a base canónica da biblioteca (gestão, metadados, conversão): só o CLI
-  # (calibredb, ebook-convert), atrás de um agente HTTP com chave de API (CALIBRE_API_KEY) que é o único que escreve em
-  # /library. O Kavita lê a mesma pasta (só leitura) e é o leitor web.
+  # Books (STRUCTURE.md, 6.3). Calibre is the canonical base of the library (management, metadata, conversion): only the CLI
+  # (calibredb, ebook-convert), behind an HTTP agent with an API key (CALIBRE_API_KEY) that is the only one that writes to
+  # /library. Kavita reads the same folder (read-only) and is the web reader.
   calibre:
     build:
       context: deploy/calibre
     image: ${ARIADNE_IMAGE_PREFIX:-ariadne-}calibre:${ARIADNE_TAG:-local}
     profiles: [books, all]
     environment:
-      CALIBRE_API_KEY: ${CALIBRE_API_KEY:-}     # vazia: o agente recusa-se a arrancar
+      CALIBRE_API_KEY: ${CALIBRE_API_KEY:-}     # empty: the agent refuses to start
     volumes:
       - ${BOOKS_DIR:-./data/books}:/library
     read_only: true
@@ -440,8 +440,8 @@ services:
     volumes:
       - kavita-config:/kavita/config
       - ${BOOKS_DIR:-./data/books}:/books:ro
-    # Sem porta publicada: o 1.º utilizador que se regista num Kavita novo é administrador. O `kavita-public` só
-    # abre a porta depois de o `bootstrap-books` o ter criado.
+    # No published port: the first user to register on a new Kavita is the administrator. `kavita-public` only
+    # opens the port after `bootstrap-books` has created it.
     healthcheck:
       test: ["CMD", "curl", "-sf", "-o", "/dev/null", "http://localhost:5000/api/health"]
       interval: 15s
@@ -450,7 +450,7 @@ services:
       start_period: 40s
     restart: unless-stopped
 
-  # O leitor do Kavita para fora (a API é a mesma porta), só depois de o administrador existir.
+  # The Kavita reader to the outside (the API is the same port), only after the administrator exists.
   kavita-public:
     image: alpine/socat@sha256:7f9a06753033f2b7de18edc2353f2c15153413d95a039163c6db270fc7a6c3b0   # socat 1.8.1, build 1
     profiles: [books, all]
@@ -471,43 +471,43 @@ services:
     image: ${ARIADNE_IMAGE_PREFIX:-ariadne-}server:${ARIADNE_TAG:-local}
     environment: *server-env
     volumes:
-      - ${ZIM_DIR:-./data/zim}:/zim                # rw se o catálogo puder descarregar ZIMs
+      - ${ZIM_DIR:-./data/zim}:/zim                # rw if the catalog may download ZIMs
       - models:/models
-      - ${COURSES_DIR:-./data/courses}:/courses    # repositório Git dos cursos canónicos (fora do repositório do código)
-      - ${BOOKS_DIR:-./data/books}:/books:ro       # a biblioteca do Calibre (só de leitura)
-      - ${BACKUP_DIR:-./data/backups}:/backups     # backups locais e releases (ariadne backup/release)
+      - ${COURSES_DIR:-./data/courses}:/courses    # Git repository of the canonical courses (outside the code repository)
+      - ${BOOKS_DIR:-./data/books}:/books:ro       # the Calibre library (read-only)
+      - ${BACKUP_DIR:-./data/backups}:/backups     # local backups and releases (ariadne backup/release)
     ports:
-      - "${PUBLISH_ADDRESS:?run deploy/standalone/init-env.sh}:${ARIADNE_PORT:-8800}:8800"               # API + MCP + app web
+      - "${PUBLISH_ADDRESS:?run deploy/standalone/init-env.sh}:${ARIADNE_PORT:-8800}:8800"               # API + MCP + web app
     ulimits:
-      nofile: { soft: 65536, hard: 65536 }         # ZIM abertos (ZIM_MAX_OPEN)
+      nofile: { soft: 65536, hard: 65536 }         # open ZIMs (ZIM_MAX_OPEN)
     depends_on:
       postgres: { condition: service_healthy }
       init: { condition: service_completed_successfully }
-    # O healthcheck vem da imagem (server/Dockerfile: GET /health). O server aplica as migrações ao arrancar.
+    # The healthcheck comes from the image (server/Dockerfile: GET /health). The server applies the migrations at startup.
     restart: unless-stopped
 
-  # O arranque automático (`ariadne bootstrap`, docs/STANDALONE.md), um por perfil, para uma falha num serviço não
-  # atrasar os outros. O do núcleo cria o papel limitado do gpu-gateway e a 1.ª chave de administrador da app (aparece
-  # só uma vez, no log: `docker compose logs bootstrap`); os outros fazem o setup do Wiki.js (locales, namespacing,
-  # tema), tiram o token do Moodle e criam o administrador e a biblioteca do Kavita. Os tokens vão para o cofre
-  # (ARIADNE_MASTER_KEY), que o server e os workers releem sozinhos. Idempotentes: em cada `up` só fazem o que falta.
+  # The automatic startup (`ariadne bootstrap`, docs/STANDALONE.md), one per profile, so that a failure in one service does not
+  # delay the others. The core one creates the gpu-gateway's restricted role and the app's first administrator key (it shows up
+  # only once, in the log: `docker compose logs bootstrap`); the others do the Wiki.js setup (locales, namespacing,
+  # theme), obtain the Moodle token and create the Kavita administrator and library. The tokens go to the vault
+  # (ARIADNE_MASTER_KEY), which the server and the workers re-read on their own. Idempotent: on each `up` they only do what is missing.
   bootstrap: &bootstrap
     build: *server-build
     image: ${ARIADNE_IMAGE_PREFIX:-ariadne-}server:${ARIADNE_TAG:-local}
     command: ["ariadne", "bootstrap", "--only", "gpu-gateway,admin"]
     environment:
       <<: *server-env
-      PYTHONUNBUFFERED: "1"                       # o log aparece à medida que cada passo acaba
+      PYTHONUNBUFFERED: "1"                       # the log appears as each step finishes
       WIKIJS_ADMIN_EMAIL: ${WIKIJS_ADMIN_EMAIL:-}
       WIKIJS_ADMIN_PASSWORD: ${WIKIJS_ADMIN_PASSWORD:-}
       MOODLE_WS_PASSWORD: ${MOODLE_WS_PASSWORD:-}
       KAVITA_ADMIN_USERNAME: ${KAVITA_ADMIN_USERNAME:-ariadne}
       KAVITA_ADMIN_PASSWORD: ${KAVITA_ADMIN_PASSWORD:-}
-      GPU_GATEWAY_DB_PASSWORD: ${GPU_GATEWAY_DB_PASSWORD:-}   # o papel limitado do gpu-gateway
+      GPU_GATEWAY_DB_PASSWORD: ${GPU_GATEWAY_DB_PASSWORD:-}   # the gpu-gateway's restricted role
     depends_on:
-      server: { condition: service_healthy }      # as migrações já estão aplicadas
+      server: { condition: service_healthy }      # the migrations are already applied
     healthcheck:
-      disable: true                               # corre uma vez e sai
+      disable: true                               # runs once and exits
     restart: "no"
 
   bootstrap-wiki:
@@ -525,10 +525,10 @@ services:
     profiles: [courses, all]
     command: ["ariadne", "bootstrap", "--only", "moodle"]
 
-  # O worker principal faz o trabalho curto e contínuo (indexação, importação, vizinhos, ligações, cursos,
-  # livros…). Um worker corre um job de cada vez, por isso o que é longo corre à parte: a curadoria no
-  # `worker-llm` (uma reescrita no curador em CPU demora minutos e parava a importação e a indexação) e as
-  # descargas de ZIM e a release semanal, que cifra gigabytes, no `worker-heavy`.
+  # The main worker does the short, continuous work (indexing, import, neighbors, links, courses,
+  # books…). A worker runs one job at a time, so anything long runs separately: curation in
+  # `worker-llm` (a rewrite on the CPU curator takes minutes and would stall import and indexing) and the
+  # ZIM downloads and the weekly release, which encrypts gigabytes, in `worker-heavy`.
   worker: &worker
     build: *server-build
     image: ${ARIADNE_IMAGE_PREFIX:-ariadne-}server:${ARIADNE_TAG:-local}
@@ -544,26 +544,26 @@ services:
       nofile: { soft: 65536, hard: 65536 }
     depends_on:
       postgres: { condition: service_healthy }
-      server: { condition: service_healthy }      # é o server que aplica as migrações
-    stop_grace_period: 60s                        # acaba o lote em curso e devolve o job à fila
+      server: { condition: service_healthy }      # it is the server that applies the migrations
+    stop_grace_period: 60s                        # finishes the current batch and returns the job to the queue
     healthcheck:
-      test: ["CMD", "ariadne", "ping"]            # sem HTTP: a base responde (um worker que morre leva o contentor)
+      test: ["CMD", "ariadne", "ping"]            # no HTTP: the database answers (a worker that dies takes the container with it)
       interval: 30s
       timeout: 10s
       retries: 3
     restart: unless-stopped
 
-  # A curadoria (o curador local, um job de cada vez) e o controlo dos lotes em GPU externa (Kaggle, Colab).
+  # Curation (the local curator, one job at a time) and the control of batches on external GPU (Kaggle, Colab).
   worker-llm:
     <<: *worker
     command: ["ariadne", "worker", "--only", "curator,compute"]
 
-  # O túnel do lote de GPU (perfil `tunel`, opcional; docs/WIKI-IMPORT.md secção 7). Sem ele o lote do Kaggle
-  # corre por ficheiros e nada daqui fica alcançável da internet. Com ele, o notebook fala com este gateway (só as 4
-  # rotas /gpu/v1/… de uma corrida) por um túnel Cloudflare do utilizador: o `cloudflared` é um processo filho,
-  # ligado só enquanto há uma corrida com token. Escuta só no localhost do contentor e entra na base com um papel
-  # limitado (`ariadne_gateway`, deploy/postgres/gpu-gateway.sql, que o `bootstrap` cria com GPU_GATEWAY_DB_PASSWORD).
-  # As credenciais do túnel: o JSON do `cloudflared tunnel create` em GPU_TUNNEL_DIR/tunnel.json (sem ele, sem túnel).
+  # The GPU batch tunnel (`tunel` profile, optional; docs/WIKI-IMPORT.md section 7). Without it the Kaggle batch
+  # runs through files and nothing here is reachable from the internet. With it, the notebook talks to this gateway (only the 4
+  # /gpu/v1/… routes of a run) through the user's own Cloudflare tunnel: `cloudflared` is a child process,
+  # running only while a run with a token is active. It listens only on the container's localhost and connects to the database with a
+  # restricted role (`ariadne_gateway`, deploy/postgres/gpu-gateway.sql, which `bootstrap` creates with GPU_GATEWAY_DB_PASSWORD).
+  # The tunnel credentials: the JSON from `cloudflared tunnel create` in GPU_TUNNEL_DIR/tunnel.json (without it, no tunnel).
   gpu-gateway:
     build: *server-build
     image: ${ARIADNE_IMAGE_PREFIX:-ariadne-}server:${ARIADNE_TAG:-local}
@@ -583,9 +583,9 @@ services:
     security_opt: ["no-new-privileges:true"]
     mem_limit: 512m
     depends_on:
-      bootstrap: { condition: service_completed_successfully }   # o papel ariadne_gateway
+      bootstrap: { condition: service_completed_successfully }   # the ariadne_gateway role
     healthcheck:
-      test: ["CMD", "ariadne", "ping"]            # sem /health de propósito (só as 4 rotas do lote)
+      test: ["CMD", "ariadne", "ping"]            # deliberately no /health (only the 4 batch routes)
       interval: 30s
       timeout: 10s
       retries: 3
@@ -597,11 +597,11 @@ services:
     command: ["ariadne", "worker", "--only", "catalog,release"]
     environment: *server-env
     volumes:
-      - ${ZIM_DIR:-./data/zim}:/zim                # as descargas gravam aqui
+      - ${ZIM_DIR:-./data/zim}:/zim                # downloads are written here
       - ${COURSES_DIR:-./data/courses}:/courses:ro
       - ${BACKUP_DIR:-./data/backups}:/backups
-      # A chave privada de ASSINATURA das releases (ssh-keygen -t ed25519; ver README): só de leitura, só aqui.
-      # Sem ficheiro, o Docker cria uma pasta vazia e a release recusa-se com uma mensagem clara.
+      # The private SIGNING key of the releases (ssh-keygen -t ed25519; see README): read-only, only here.
+      # Without the file, Docker creates an empty folder and the release refuses with a clear message.
       - ${RELEASE_SIGNING_KEY_PATH:-./data/secrets/release_signing_key}:/run/ariadne/release_signing_key:ro
     depends_on:
       postgres: { condition: service_healthy }
@@ -615,7 +615,7 @@ services:
     restart: unless-stopped
 
 networks:
-  # Sem rota para fora: o Jobe só fala com o jobe-gateway (o código dos alunos não sai daqui).
+  # No route to the outside: Jobe only talks to jobe-gateway (the students' code does not leave here).
   sandbox:
     internal: true
 

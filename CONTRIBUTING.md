@@ -58,7 +58,9 @@ cd ../web
 npm run typecheck && npm test          # TypeScript and vitest
 ```
 
-Every behavior change comes with tests. CI runs the same checks on your pull request.
+Every behavior change comes with tests. The project's CI runs on the maintainer's own infrastructure, not on GitHub, so the checks
+are not triggered by your pull request: run the commands above before you open it, and the maintainer runs the full CI when the
+contribution is imported (see below).
 
 ## Code style
 
@@ -94,7 +96,7 @@ This public repository is **generated** from the maintainer's development reposi
 with each release, the public tree is exported as a single commit. Therefore:
 
 1. Open your pull request against this repository, from a fork, with tests and a description of why.
-2. The pull request's CI has to pass; a maintainer reviews it here.
+2. A maintainer reviews it here and runs the CI on it (see above).
 3. Once accepted, the maintainer applies your changes to the development repository **preserving your authorship** (your
    name and email on the commits, and the `Signed-off-by`), and the pull request is closed here with a link to that commit.
 4. Your changes reappear in this repository in the next release, inside the exported tree.

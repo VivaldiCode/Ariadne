@@ -1,6 +1,6 @@
 #!/bin/sh
-# Descarrega o ZIM de teste pequeno (1,8 MB) para a pasta dos ZIM.
-# Uso: deploy/kiwix/get-test-zim.sh [pasta]   (por omissão: ./data/zim)
+# Downloads the small test ZIM (1.8 MB) into the ZIM folder.
+# Usage: deploy/kiwix/get-test-zim.sh [folder]   (default: ./data/zim)
 set -eu
 
 ZIM=wikipedia_en_ray-charles_nopic_2026-08.zim

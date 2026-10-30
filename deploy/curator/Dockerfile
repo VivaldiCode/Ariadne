@@ -27,7 +27,7 @@ RUN apt-get update \
 COPY --from=build /llama.cpp/build/bin/llama-server /usr/local/bin/llama-server
 COPY model.lock entrypoint.sh /usr/local/share/ariadne-curator/
 RUN llama-server --version \
- && useradd --system --uid 1000 --home-dir /models curator \
+ && useradd --uid 1000 --home-dir /models curator \
  && mkdir -p /models && chown curator:curator /models   # o volume herda o dono
 USER curator
 EXPOSE 8085
